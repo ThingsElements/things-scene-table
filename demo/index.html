@@ -86,6 +86,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             strokeStyle: 'black',
             lineWidth: 1,
             lineStyle: 'black',
+            fillStyle: {
+              type: 'gradient',
+              gradientType: 'linear',
+              colorStops: [{
+                position: 0,
+                color: 'white'
+              }, {
+                position: 0.5,
+                color: 'orange'
+              }, {
+                position: 1,
+                color: 'white'
+              }],
+              rotation: Math.PI / 2,
+            },
             rows: 5,
             columns: 10,
             data: [

@@ -5,20 +5,25 @@ const EMPTY_DATA = [[]];
 export default class Table extends Rect {
 
   _drawCell(context, x, y, width, height, lines) {
-    Component.drawText(
-      context,
-      {
-        left: x,
-        top: y,
-        width: width,
-        height: height
-      },
-      lines,
-      {}
-    );
+    var bounds = {
+      left: x,
+      top: y,
+      width: width,
+      height: height
+    };
 
     context.rect(x, y, width, height);
+
     Component.drawStroke(context, this.model);
+
+    Component.drawFill(context,
+      bounds, {
+        x: x + width / 2,
+        y: y + height / 2
+      }, this.model
+    );
+
+    Component.drawText(context, bounds, lines, this.model);
   }
 
   _draw(context) {
@@ -36,10 +41,7 @@ export default class Table extends Rect {
       height
     } = this.bounds;
 
-    // 박스 그리기
     context.beginPath();
-
-    context.rect(left, top, width, height);
 
     var i, j;
     var cell_width = width / columns;
@@ -60,8 +62,10 @@ export default class Table extends Rect {
         );
       }
     }
+  }
 
-    super._draw(context);
+  _post_draw(context) {
+    this.drawText(context);
   }
 
   get controls() {}
