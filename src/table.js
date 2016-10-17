@@ -14,13 +14,13 @@ export default class Table extends Rect {
 
     context.rect(x, y, width, height);
 
-    Component.drawStroke(context, this.model);
+    Component.drawStroke(context, this.model.cellStyle || {});
 
     Component.drawFill(context,
       bounds, {
         x: x + width / 2,
         y: y + height / 2
-      }, this.model
+      }, this.model.cellStyle || {}
     );
 
     Component.drawText(context, bounds, lines, this.model);
@@ -62,9 +62,12 @@ export default class Table extends Rect {
         );
       }
     }
+
+    context.rect(left, top, width, height);
   }
 
   _post_draw(context) {
+    this.drawStroke(context);
     this.drawText(context);
   }
 

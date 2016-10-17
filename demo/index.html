@@ -84,25 +84,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             width: 500,
             height: 200,
             strokeStyle: 'black',
-            lineWidth: 1,
-            lineStyle: 'black',
-            fillStyle: {
-              type: 'gradient',
-              gradientType: 'linear',
-              colorStops: [{
-                position: 0,
-                color: 'white'
-              }, {
-                position: 0.5,
-                color: 'orange'
-              }, {
-                position: 1,
-                color: 'white'
-              }],
-              rotation: Math.PI / 2,
-            },
+            lineWidth: 2,
             rows: 5,
             columns: 10,
+            cellStyle: {
+              strokeStyle: 'blue',
+              lineWidth: 1,
+              fillStyle: {
+                type: 'gradient',
+                gradientType: 'linear',
+                colorStops: [{
+                  position: 0,
+                  color: 'white'
+                }, {
+                  position: 0.5,
+                  color: 'lightgray'
+                }, {
+                  position: 1,
+                  color: 'white'
+                }],
+                rotation: Math.PI / 2,
+              },
+            },
             data: [
               ['header1', 'header2', 'header3'],
               [100, 200, 300],
