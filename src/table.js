@@ -16,6 +16,9 @@ export default class Table extends Rect {
       lines,
       {}
     );
+
+    context.rect(x, y, width, height);
+    Component.drawStroke(context, this.model);
   }
 
   _draw(context) {
