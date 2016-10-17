@@ -58,11 +58,11 @@ export default class Table extends Rect {
         );
       }
     }
+
+    super._draw(context);
   }
 
   get controls() {}
 }
-
-// Component.memoize(Table.prototype, 'controls', false);
 
 Component.register('table', Table);
