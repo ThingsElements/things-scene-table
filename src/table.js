@@ -1,13 +1,11 @@
-import text from './text'
-
 var { Component, Rect } = scene;
 
 const EMPTY_DATA = [[]];
 
 export default class Table extends Rect {
 
-  _drawCell(context, x, y, width, height, data) {
-    text(
+  _drawCell(context, x, y, width, height, lines) {
+    Component.drawText(
       context,
       {
         left: x,
@@ -15,7 +13,7 @@ export default class Table extends Rect {
         width: width,
         height: height
       },
-      data,
+      lines,
       {}
     );
   }
@@ -46,7 +44,8 @@ export default class Table extends Rect {
 
     for(i = 0;i < rows;i++) {
       for(j = 0;j < columns;j++) {
-        let cell_data = (data[i] === undefined) ? undefined : data[i][j];
+        let cell_data = (data[i] === undefined) ? '' : data[i][j];
+        let lines = Component.textLines(context, cell_width, this.font, cell_data, true)
 
         this._drawCell(
           context,
@@ -54,7 +53,7 @@ export default class Table extends Rect {
           top + i * cell_height,
           cell_width,
           cell_height,
-          cell_data
+          lines
         );
       }
     }
