@@ -1,3 +1,5 @@
+import splitTextToLines from './text-wrapper'
+
 const DEFAULT = {
   ALPHA : 1,
   FONT_SIZE : 15,
@@ -5,6 +7,20 @@ const DEFAULT = {
   FONT_COLOR : 'black',
   TEXT_ALIGN : 'center',
   TEXT_BASELINE : 'middle'
+}
+
+function textLines(context, data, width) {
+  if(!data)
+    return [];
+
+  var lines = splitTextToLines(
+    context,
+    data,
+    width,
+    true
+  );
+
+  return lines;
 }
 
 function font(style) {
@@ -52,9 +68,7 @@ export default function text(context, bounds, data, style) {
   context.font = font(style);
 
   // 4. 총 텍스트 라인을 계산한다.
-  // var lines = this.textLines;
-  var line = (data === undefined) ? '' : data;
-  var lines = [[String(line)]];
+  var lines = textLines(context, String((data === undefined) ? '' : data), width);
 
   // 5. 전체 높이를 계산한다.
   //    - 라인수 * lineHeight
