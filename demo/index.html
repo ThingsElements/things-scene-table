@@ -84,12 +84,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             width: 500,
             height: 200,
             strokeStyle: 'black',
+            fillStyle: 'red',
             lineWidth: 2,
             rows: 5,
             columns: 10,
-            cellStyle: {
+            headerCellStyle: {
+              height: 40,
+              fillStyle: 'gray',
+              lineWidth: 15,
+              strokeStyle: 'red',
+              fontColor: 'blue',
+              fontSize: 15,
+              bold: true
+            },
+            cellStyle: [{
+              fontColor: 'green',
+              fontSize: 15,
+              width: 70,
+              // bold: true,
               strokeStyle: 'blue',
-              lineWidth: 1,
+              lineWidth: 5,
               fillStyle: {
                 type: 'gradient',
                 gradientType: 'linear',
@@ -105,7 +119,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }],
                 rotation: Math.PI / 2,
               },
-            },
+            }, {}, {
+              fontColor: 'green',
+              fontSize: 15,
+              width: 70,
+              // bold: true,
+              strokeStyle: 'blue',
+              lineWidth: 5,
+              fillStyle: {
+                type: 'gradient',
+                gradientType: 'linear',
+                colorStops: [{
+                  position: 0,
+                  color: 'white'
+                }, {
+                  position: 0.5,
+                  color: 'lightgray'
+                }, {
+                  position: 1,
+                  color: 'white'
+                }],
+                rotation: Math.PI / 2,
+              },
+            }],
             data: [
               ['header1', 'header2', 'header3'],
               [100, 200, 300],
@@ -122,10 +158,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             lineStyle: 'black',
             rows: 5,
             columns: 10,
-            headerStyle: {
+            headerCellStyle: {
 
             },
-            dataStyle: {
+            cellStyle: {
 
             },
             data: [
