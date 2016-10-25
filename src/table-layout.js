@@ -47,7 +47,7 @@ var TableLayout = {
 
   reflow: function(container) {
     let layoutConfig = container.get('layoutConfig')
-    let columns = (layoutConfig && layoutConfig.columns) || 3
+    let columns = (layoutConfig && layoutConfig.columns) || container.get('columns')
     let rows = Math.ceil(container.components.length / columns);
 
     var padding = parsePadding(container.get("padding"));
