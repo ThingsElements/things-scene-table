@@ -67,7 +67,7 @@ export default class TableX extends Container {
               lineDash: DEFAULT_LINE_DASH
             }
           }
-        }));
+        }, this.app));
       }
       this.add(newbies);
     } else {

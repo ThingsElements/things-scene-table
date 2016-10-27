@@ -1,6 +1,6 @@
 var {
   Component,
-  Rect
+  RectPath
 } = scene;
 
 const EMPTY_BORDER = {}
@@ -10,7 +10,7 @@ const EMPTY_BORDER = {}
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
  * 3. 데이타를 받을 수 있음.
  */
-export default class TableCell extends Rect {
+export default class TableCell extends RectPath(Component) {
 
   get border() {
     var border = this.model.border || EMPTY_BORDER;
@@ -30,12 +30,17 @@ export default class TableCell extends Rect {
       left,
       top,
       width,
-      height
-    } = this.bounds;
+      height,
+      fillStyle
+    } = this.model;
 
     var border = this.model.border || {};
 
-    // 박스 그리기
+    // Cell 채우기.
+    context.fillStyle = fillStyle;
+    context.fillRect(left, top, width, height);
+
+    // Border 그리기
     context.beginPath();
 
     context.moveTo(left, top);
@@ -45,13 +50,6 @@ export default class TableCell extends Rect {
     this._drawBorder(context, left, top + height, border.bottom);
     this._drawBorder(context, left, top, border.left);
   }
-
-  _post_draw(context) {
-    this.drawFill(context);
-    this.drawText(context);
-  }
-
-  get controls() {}
 }
 
 ["border"].forEach(getter => Component.memoize(TableCell.prototype, getter, false));
