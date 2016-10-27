@@ -84,7 +84,13 @@ var TableLayout = {
 
   isStuck: function(component) {
     return true
-  }
+  },
+
+  /*
+   * 하위 컴포넌트를 영역으로 선택하는 경우에, 바운드에 join만 되어도 선택된 것으로 판단하도록 한다.
+   * joinType이 false이거나, 정의되어있지 않으면, 바운드에 포함되어야 선택된 것으로 판단한다.
+   */
+  joinType: true
 }
 
 Layout.register('table', TableLayout)
