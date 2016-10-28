@@ -17,7 +17,7 @@ export default class TableCell extends RectPath(Component) {
   }
 
   _drawBorder(context, x, y, style) {
-    if(style) {
+    if(style && style.strokeStyle && style.lineWidth && style.lineDash) {
       context.lineTo(x, y);
       Component.drawStroke(context, style);
     } else {

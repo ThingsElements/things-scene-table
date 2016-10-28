@@ -11,6 +11,17 @@ const DEFAULT_STROKE_STYLE = 'red'
 const DEFAULT_LINE_WIDTH = 1
 const DEFAULT_LINE_DASH = 'dash'
 
+const SIDES = {
+  all: ['top', 'left', 'bottom', 'right'],
+  out: ['top', 'left', 'bottom', 'right'],
+  left: ['left'],
+  right: ['right'],
+  top: ['top'],
+  bottom: ['bottom'],
+  leftright: ['left', 'right'],
+  topbottom: ['top', 'bottom']
+}
+
 const TABLE_LAYOUT = Layout.get('table')
 
 function hasAnyProperty(o, ...properties) {
@@ -45,28 +56,11 @@ export default class TableX extends Container {
           height: 1,
           fillStyle: 'lightgray',
           textWrap: true,
-          border: {
-            left: {
-              strokeStyle: DEFAULT_STROKE_STYLE,
-              lineWidth: DEFAULT_LINE_WIDTH,
-              lineDash: DEFAULT_LINE_DASH
-            },
-            right: {
-              strokeStyle: DEFAULT_STROKE_STYLE,
-              lineWidth: DEFAULT_LINE_WIDTH,
-              lineDash: DEFAULT_LINE_DASH
-            },
-            top: {
-              strokeStyle: DEFAULT_STROKE_STYLE,
-              lineWidth: DEFAULT_LINE_WIDTH,
-              lineDash: DEFAULT_LINE_DASH
-            },
-            bottom: {
-              strokeStyle: DEFAULT_STROKE_STYLE,
-              lineWidth: DEFAULT_LINE_WIDTH,
-              lineDash: DEFAULT_LINE_DASH
-            }
-          }
+          border: this.buildBorderStyle({
+            strokeStyle: DEFAULT_STROKE_STYLE,
+            lineWidth: DEFAULT_LINE_WIDTH,
+            lineDash: DEFAULT_LINE_DASH
+          }, 'all')
         }, this.app));
       }
       this.add(newbies);
@@ -82,6 +76,47 @@ export default class TableX extends Container {
 
   get rows() {
     return this.get('rows')
+  }
+
+  buildBorderStyle(style, where) {
+    return (SIDES[where] || []).reduce((border, side) => {
+      border[side] = style
+      return border
+    }, {})
+  }
+
+  setCellsStyle(cells, style, where) {
+    cells.forEach(cell => {
+      cell.set('border', Object.assign({}, cell.get('border') || {}, this.buildBorderStyle(style, where)))
+    })
+    // switch(where) {
+    // case 'all':
+    //   break;
+    // case 'in':
+    //   // 만일 모든 ins의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'out':
+    //   // 만일 모든 out의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'left':
+    //   // 만일 모든 left의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'right':
+    //   // 만일 모든 right의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'center':
+    //   // 만일 모든 center의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'middle':
+    //   // 만일 모든 middle의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'top':
+    //   // 만일 모든 top의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // case 'bottom':
+    //   // 만일 모든 bottom의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
+    //   break;
+    // }
   }
 
   get columns() {

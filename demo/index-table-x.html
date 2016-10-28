@@ -89,59 +89,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           borderWidth, borderStyle, borderColor
         } = app.border;
 
-        switch(e.detail) {
-        case 'all':
-          app.selected.forEach(function(c) {
-            c.set('border', {
-              left: {
-                strokeStyle: borderColor,
-                lineDash: borderStyle,
-                lineWidth: borderWidth
-              },
-              top: {
-                strokeStyle: borderColor,
-                lineDash: borderStyle,
-                lineWidth: borderWidth
-              },
-              right: {
-                strokeStyle: borderColor,
-                lineDash: borderStyle,
-                lineWidth: borderWidth
-              },
-              bottom: {
-                strokeStyle: borderColor,
-                lineDash: borderStyle,
-                lineWidth: borderWidth
-              }
-            })
-          })
+        let table = app.selected[0].parent;
+        if(table.get('type') !== 'table-x')
+          return;
 
-          break;
-        case 'in':
-          // 만일 모든 ins의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'out':
-          // 만일 모든 out의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'left':
-          // 만일 모든 left의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'right':
-          // 만일 모든 right의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'center':
-          // 만일 모든 center의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'middle':
-          // 만일 모든 middle의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'top':
-          // 만일 모든 top의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        case 'bottom':
-          // 만일 모든 bottom의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-          break;
-        }
+        table.setCellsStyle(app.selected, {
+          strokeStyle: borderColor,
+          lineDash: borderStyle,
+          lineWidth: borderWidth
+        }, e.detail);
       }
 
       app.border = {}
