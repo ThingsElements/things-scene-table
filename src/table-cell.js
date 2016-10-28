@@ -12,6 +12,14 @@ const EMPTY_BORDER = {}
  */
 export default class TableCell extends RectPath(Component) {
 
+  get rowspan() {
+    return this.get('rowspan')
+  }
+
+  get colspan() {
+    return this.get('colspan')
+  }
+
   get border() {
     var border = this.model.border || EMPTY_BORDER;
   }

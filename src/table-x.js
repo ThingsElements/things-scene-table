@@ -8,10 +8,6 @@ var {
   Model
 } = scene;
 
-const DEFAULT_STROKE_STYLE = 'red'
-const DEFAULT_LINE_WIDTH = 1
-const DEFAULT_LINE_DASH = 'dash'
-
 const SIDES = {
   all: ['top', 'left', 'bottom', 'right'],
   out: ['top', 'left', 'bottom', 'right'],
@@ -29,6 +25,12 @@ const CLEAR_STYLE = {
   lineWidth: 0
 }
 
+const DEFAULT_STYLE = {
+  strokeStyle: 'red',
+  lineDash: 'solid',
+  lineWidth: 1
+}
+
 const TABLE_LAYOUT = Layout.get('table')
 
 function hasAnyProperty(o, ...properties) {
@@ -38,42 +40,108 @@ function hasAnyProperty(o, ...properties) {
   }
 }
 
+function buildNewCell(app) {
+  return Model.compile({
+    type: 'table-cell',
+    strokeStyle: 'blue',
+    left: 0,
+    top: 0,
+    width: 1,
+    height: 1,
+    fillStyle: 'lightgray',
+    textWrap: true,
+    border: buildBorderStyle(DEFAULT_STYLE, 'all')
+  }, app)
+}
+
+function buildBorderStyle(style, where) {
+  return (SIDES[where] || []).reduce((border, side) => {
+    border[side] = style
+    return border
+  }, {})
+}
+
+function setCellBorder(cell, style, where) {
+  if(!cell)
+    return
+  cell.set('border', Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where)))
+}
+
+function isLeftMost(total, columns, indices, i) {
+  return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1;
+}
+
+function isRightMost(total, columns, indices, i) {
+  return i == total - 1 || (i % columns == columns - 1) || indices.indexOf(i + 1) == -1;
+}
+
+function isTopMost(total, columns, indices, i) {
+  return i < columns || indices.indexOf(i - columns) == -1;
+}
+
+function isBottomMost(total, columns, indices, i) {
+  return i > (total - columns - 1) || indices.indexOf(i + columns) == -1;
+}
+
+function above(columns, i) {
+  return i - columns;
+}
+
+function below(columns, i) {
+  return i + columns;
+}
+
+function before(columns, i) {
+  return !(i % columns) ? -1 : i - 1;
+}
+
+function after(columns, i) {
+  return !((i + 1) % columns) ? -1 : i + 1;
+}
+
 export default class TableX extends Container {
 
   constructor(model, context) {
     super(model, context);
 
-    this.buildCells();
+    if(this.size() == 0)
+      this.buildCells(model.rows, model.columns, 0, 0);
   }
 
-  buildCells() {
-    var oldsize = this.size();
-    var newsize = this.rows * this.columns;
+  buildCells(newrows, newcolumns, oldrows, oldcolumns) {
+    if(newrows < oldrows) {
+      let removals = this._components.slice(oldcolumns * newrows);
+      this.remove(removals);
+    }
 
-    if(newsize > oldsize) {
+    var minrows = Math.min(newrows, oldrows)
+
+    if(newcolumns > oldcolumns) {
+      for(let r = 0;r < minrows;r++) {
+        for(let c = oldcolumns;c < newcolumns;c++) {
+          this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c);
+        }
+      }
+    } else if(newcolumns < oldcolumns) {
+      let removals = []
+
+      for(let r = 0;r < minrows;r++) {
+        for(let c = newcolumns;c < oldcolumns;c++) {
+          removals.push(this.components[r * oldcolumns + c])
+        }
+      }
+      this.remove(removals);
+    }
+
+    if(newrows > oldrows) {
       let newbies = []
 
-      for(var i = 0;i < newsize - oldsize;i++) {
-        newbies.push(Model.compile({
-          type: 'table-cell',
-          strokeStyle: 'blue',
-          left: 0,
-          top: 0,
-          width: 1,
-          height: 1,
-          fillStyle: 'lightgray',
-          textWrap: true,
-          border: this.buildBorderStyle({
-            strokeStyle: DEFAULT_STROKE_STYLE,
-            lineWidth: DEFAULT_LINE_WIDTH,
-            lineDash: DEFAULT_LINE_DASH
-          }, 'all')
-        }, this.app));
+      for(let r = oldrows;r < newrows;r++) {
+        for(let i = 0;i < newcolumns;i++) {
+          newbies.push(buildNewCell(this.app));
+        }
       }
       this.add(newbies);
-    } else {
-      let removals = this._components.slice(newsize);
-      this.remove(removals);
     }
   }
 
@@ -83,58 +151,6 @@ export default class TableX extends Container {
 
   get rows() {
     return this.get('rows')
-  }
-
-  buildBorderStyle(style, where) {
-    return (SIDES[where] || []).reduce((border, side) => {
-      border[side] = style
-      return border
-    }, {})
-  }
-
-  setCellBorder(cell, style, where) {
-    if(!cell)
-      return
-    cell.set('border', Object.assign({}, cell.get('border') || {}, this.buildBorderStyle(style, where)))
-  }
-
-  isLeftMost(total, columns, indices, i) {
-    return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1;
-  }
-
-  isRightMost(total, columns, indices, i) {
-    return i == total - 1 || (i % columns == columns - 1) || indices.indexOf(i + 1) == -1;
-  }
-
-  isTopMost(total, columns, indices, i) {
-    return i < columns || indices.indexOf(i - columns) == -1;
-  }
-
-  isBottomMost(total, columns, indices, i) {
-    return i > (total - columns - 1) || indices.indexOf(i + columns) == -1;
-  }
-
-  isInnerCell(total, columns, indices, i) {
-    return !this.isLeftMost(total, columns, indices, i) &&
-           !this.isRightMost(total, columns, indices, i) &&
-           !this.isTopMost(total, columns, indices, i) &&
-           !this.isBottomMost(total, columns, indices, i)
-  }
-
-  above(columns, i) {
-    return i - columns;
-  }
-
-  below(columns, i) {
-    return i + columns;
-  }
-
-  before(columns, i) {
-    return !(i % columns) ? -1 : i - 1;
-  }
-
-  after(columns, i) {
-    return !((i + 1) % columns) ? -1 : i + 1;
   }
 
   setCellsStyle(cells, style, where) {
@@ -148,91 +164,91 @@ export default class TableX extends Container {
 
       switch(where) {
       case 'all':
-        this.setCellBorder(cell, style, where);
+        setCellBorder(cell, style, where);
 
-        if(this.isLeftMost(total, columns, indices, i))
-          this.setCellBorder(components[this.before(columns, i)], style, 'right')
-        if(this.isRightMost(total, columns, indices, i))
-          this.setCellBorder(components[this.after(columns, i)], style, 'left')
-        if(this.isTopMost(total, columns, indices, i))
-          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
-        if(this.isBottomMost(total, columns, indices, i))
-          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], style, 'right')
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], style, 'left')
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], style, 'bottom')
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], style, 'top')
         break;
       case 'in':
-        if(!this.isLeftMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'left')
+        if(!isLeftMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'left')
         }
-        if(!this.isRightMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'right')
+        if(!isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
         }
-        if(!this.isTopMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'top')
+        if(!isTopMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'top')
         }
-        if(!this.isBottomMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'bottom')
+        if(!isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
         }
         break;
       case 'out':
-        if(this.isLeftMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'left')
-          this.setCellBorder(components[this.before(columns, i)], style, 'right')
+        if(isLeftMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'left')
+          setCellBorder(components[before(columns, i)], style, 'right')
         }
-        if(this.isRightMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'right')
-          this.setCellBorder(components[this.after(columns, i)], style, 'left')
+        if(isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
+          setCellBorder(components[after(columns, i)], style, 'left')
         }
-        if(this.isTopMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'top')
-          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
+        if(isTopMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'top')
+          setCellBorder(components[above(columns, i)], style, 'bottom')
         }
-        if(this.isBottomMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'bottom')
-          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        if(isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
+          setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'left':
-        if(this.isLeftMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'left')
-          this.setCellBorder(components[this.before(columns, i)], style, 'right')
+        if(isLeftMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'left')
+          setCellBorder(components[before(columns, i)], style, 'right')
         }
         break;
       case 'right':
-        if(this.isRightMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'right')
-          this.setCellBorder(components[this.after(columns, i)], style, 'left')
+        if(isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
+          setCellBorder(components[after(columns, i)], style, 'left')
         }
         break;
       case 'center':
-        if(!this.isLeftMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'left')
+        if(!isLeftMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'left')
         }
-        if(!this.isRightMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'right')
+        if(!isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
         }
         break;
       case 'middle':
-        if(!this.isTopMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'top')
+        if(!isTopMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'top')
         }
-        if(!this.isBottomMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'bottom')
+        if(!isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
         }
         break;
       case 'top':
-        if(this.isTopMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'top')
-          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
+        if(isTopMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'top')
+          setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         break;
       case 'bottom':
-        if(this.isBottomMost(total, columns, indices, i)) {
-          this.setCellBorder(cell, style, 'bottom')
-          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        if(isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
+          setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'clear':
-        this.setCellBorder(cell, CLEAR_STYLE, 'all')
+        setCellBorder(cell, CLEAR_STYLE, 'all')
       }
     })
   }
@@ -277,7 +293,12 @@ export default class TableX extends Container {
 
   onchange(after, before) {
     if(hasAnyProperty(after, "rows", "columns")) {
-      this.buildCells()
+      this.buildCells(
+        this.get('rows'),
+        this.get('columns'),
+        before.rows === undefined ? this.get('rows') : before.rows,
+        before.columns === undefined ? this.get('columns') : before.columns
+      )
     }
   }
 }

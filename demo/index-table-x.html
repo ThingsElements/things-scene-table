@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../things-scene-viewer/things-scene-layer.html">
     <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
 
+    <link rel="import" href="../../things-designer-elements/things-editor-number-input.html">
     <link rel="import" href="../../things-designer-elements/things-editor-border.html">
     <link rel="import" href="../../things-scene-modeler/things-scene-properties.html">
 
@@ -61,9 +62,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <fieldset>
           <legend>table properties</legend>
           <label>rows</label>
-          <input type="text" value="{{target.rows::change}}"/>
+          <input is="things-editor-number-input" number="{{target.rows::change}}"/>
           <label>columns</label>
-          <input type="text" value="{{target.columns::change}}"/>
+          <input is="things-editor-number-input" number="{{target.columns::change}}"/>
         </fieldset>
       </things-scene-properties>
 
