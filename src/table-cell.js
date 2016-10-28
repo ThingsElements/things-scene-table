@@ -16,12 +16,12 @@ export default class TableCell extends RectPath(Component) {
     var border = this.model.border || EMPTY_BORDER;
   }
 
-  _drawBorder(context, x, y, style) {
+  _drawBorder(context, x, y, to_x, to_y, style) {
     if(style && style.strokeStyle && style.lineWidth && style.lineDash) {
-      context.lineTo(x, y);
-      Component.drawStroke(context, style);
-    } else {
+      context.beginPath();
       context.moveTo(x, y)
+      context.lineTo(to_x, to_y);
+      Component.drawStroke(context, style);
     }
   }
 
@@ -41,14 +41,10 @@ export default class TableCell extends RectPath(Component) {
     context.fillRect(left, top, width, height);
 
     // Border 그리기
-    context.beginPath();
-
-    context.moveTo(left, top);
-
-    this._drawBorder(context, left + width, top, border.top);
-    this._drawBorder(context, left + width, top + height, border.right);
-    this._drawBorder(context, left, top + height, border.bottom);
-    this._drawBorder(context, left, top, border.left);
+    this._drawBorder(context, left, top, left + width, top, border.top);
+    this._drawBorder(context, left + width, top, left + width, top + height, border.right);
+    this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
+    this._drawBorder(context, left, top + height, left, top, border.left);
   }
 }
 

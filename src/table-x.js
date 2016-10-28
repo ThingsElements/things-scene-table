@@ -22,6 +22,13 @@ const SIDES = {
   topbottom: ['top', 'bottom']
 }
 
+const OPPOSITE = {
+  left: 'right',
+  right: 'left',
+  top: 'bottom',
+  bottom: 'top'
+}
+
 const TABLE_LAYOUT = Layout.get('table')
 
 function hasAnyProperty(o, ...properties) {
@@ -79,44 +86,154 @@ export default class TableX extends Container {
   }
 
   buildBorderStyle(style, where) {
-    return (SIDES[where] || []).reduce((border, side) => {
+    var border = (SIDES[where] || []).reduce((border, side) => {
       border[side] = style
       return border
     }, {})
+    return border;
+  }
+
+  setCellBorder(cell, style, where) {
+    if(!cell)
+      return
+    cell.set('border', Object.assign({}, cell.get('border') || {}, this.buildBorderStyle(style, where)))
+  }
+
+  isLeftMost(total, columns, indices, i) {
+    return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1;
+  }
+
+  isRightMost(total, columns, indices, i) {
+    return i == total - 1 || (i % columns == columns - 1) || indices.indexOf(i + 1) == -1;
+  }
+
+  isTopMost(total, columns, indices, i) {
+    return i < columns || indices.indexOf(i - columns) == -1;
+  }
+
+  isBottomMost(total, columns, indices, i) {
+    return i > (total - columns - 1) || indices.indexOf(i + columns) == -1;
+  }
+
+  isInnerCell(total, columns, indices, i) {
+    return !this.isLeftMost(total, columns, indices, i) &&
+           !this.isRightMost(total, columns, indices, i) &&
+           !this.isTopMost(total, columns, indices, i) &&
+           !this.isBottomMost(total, columns, indices, i)
+  }
+
+  above(columns, i) {
+    return i - columns;
+  }
+
+  below(columns, i) {
+    return i + columns;
+  }
+
+  before(columns, i) {
+    return !(i % columns) ? -1 : i - 1;
+  }
+
+  after(columns, i) {
+    return !((i + 1) % columns) ? -1 : i + 1;
   }
 
   setCellsStyle(cells, style, where) {
-    cells.forEach(cell => {
-      cell.set('border', Object.assign({}, cell.get('border') || {}, this.buildBorderStyle(style, where)))
+    var components = this.components;
+    var total = components.length;
+    var columns = this.get('columns');
+    var indices = cells.map(cell => components.indexOf(cell));
+
+    indices.forEach(i => {
+      var cell = components[i];
+
+      switch(where) {
+      case 'all':
+        this.setCellBorder(cell, style, where);
+
+        if(this.isLeftMost(total, columns, indices, i))
+          this.setCellBorder(components[this.before(columns, i)], style, 'right')
+        if(this.isRightMost(total, columns, indices, i))
+          this.setCellBorder(components[this.after(columns, i)], style, 'left')
+        if(this.isTopMost(total, columns, indices, i))
+          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
+        if(this.isBottomMost(total, columns, indices, i))
+          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        break;
+      case 'in':
+        if(!this.isLeftMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'left')
+        }
+        if(!this.isRightMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'right')
+        }
+        if(!this.isTopMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'top')
+        }
+        if(!this.isBottomMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'bottom')
+        }
+        break;
+      case 'out':
+        if(this.isLeftMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'left')
+          this.setCellBorder(components[this.before(columns, i)], style, 'right')
+        }
+        if(this.isRightMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'right')
+          this.setCellBorder(components[this.after(columns, i)], style, 'left')
+        }
+        if(this.isTopMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'top')
+          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
+        }
+        if(this.isBottomMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'bottom')
+          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        }
+        break;
+      case 'left':
+        if(this.isLeftMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'left')
+          this.setCellBorder(components[this.before(columns, i)], style, 'right')
+        }
+        break;
+      case 'right':
+        if(this.isRightMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'right')
+          this.setCellBorder(components[this.after(columns, i)], style, 'left')
+        }
+        break;
+      case 'center':
+        if(!this.isLeftMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'left')
+        }
+        if(!this.isRightMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'right')
+        }
+        break;
+      case 'middle':
+        if(!this.isTopMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'top')
+        }
+        if(!this.isBottomMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'bottom')
+        }
+        break;
+      case 'top':
+        if(this.isTopMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'top')
+          this.setCellBorder(components[this.above(columns, i)], style, 'bottom')
+        }
+        break;
+      case 'bottom':
+        if(this.isBottomMost(total, columns, indices, i)) {
+          this.setCellBorder(cell, style, 'bottom')
+          this.setCellBorder(components[this.below(columns, i)], style, 'top')
+        }
+        break;
+      }
     })
-    // switch(where) {
-    // case 'all':
-    //   break;
-    // case 'in':
-    //   // 만일 모든 ins의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'out':
-    //   // 만일 모든 out의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'left':
-    //   // 만일 모든 left의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'right':
-    //   // 만일 모든 right의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'center':
-    //   // 만일 모든 center의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'middle':
-    //   // 만일 모든 middle의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'top':
-    //   // 만일 모든 top의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // case 'bottom':
-    //   // 만일 모든 bottom의 td 스타일 값이 같으면 그 값으로 app.border를 설정한다.
-    //   break;
-    // }
   }
 
   get columns() {
