@@ -1,10 +1,11 @@
 import TableCell from './table-cell'
 import TableLayout from './table-layout'
 
-var { Component,
-      Container,
-      Layout,
-      Model
+var {
+  Component,
+  Container,
+  Layout,
+  Model
 } = scene;
 
 const DEFAULT_STROKE_STYLE = 'red'
@@ -22,11 +23,10 @@ const SIDES = {
   topbottom: ['top', 'bottom']
 }
 
-const OPPOSITE = {
-  left: 'right',
-  right: 'left',
-  top: 'bottom',
-  bottom: 'top'
+const CLEAR_STYLE = {
+  strokeStyle: '',
+  lineDash: 'solid',
+  lineWidth: 0
 }
 
 const TABLE_LAYOUT = Layout.get('table')
@@ -86,11 +86,10 @@ export default class TableX extends Container {
   }
 
   buildBorderStyle(style, where) {
-    var border = (SIDES[where] || []).reduce((border, side) => {
+    return (SIDES[where] || []).reduce((border, side) => {
       border[side] = style
       return border
     }, {})
-    return border;
   }
 
   setCellBorder(cell, style, where) {
@@ -232,6 +231,8 @@ export default class TableX extends Container {
           this.setCellBorder(components[this.below(columns, i)], style, 'top')
         }
         break;
+      case 'clear':
+        this.setCellBorder(cell, CLEAR_STYLE, 'all')
       }
     })
   }
