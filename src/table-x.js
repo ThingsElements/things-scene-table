@@ -106,6 +106,79 @@ function array(value, size) {
   return arr
 }
 
+var columnControlHandler = {
+  ondragmove: function(point, index, component) {
+    var { left, top, width, height } = component.textBounds
+    var widths_sum = component.widths_sum
+
+    var widths = component.widths.slice()
+
+    /* 컨트롤의 원래 위치를 구한다. */
+    var origin_pos_unit = widths.slice(0, index + 1).reduce((sum, width) => sum + width, 0)
+    var origin_offset = left + origin_pos_unit / widths_sum * width
+
+    /*
+     * point의 좌표는 부모 레이어 기준의 x, y 값이다.
+     * 따라서, 도형의 회전을 감안한 좌표로의 변환이 필요하다.
+     * Transcoord시에는 point좌표가 부모까지 transcoord되어있는 상태이므로,
+     * 컴포넌트자신에 대한 transcoord만 필요하다.(마지막 파라미터를 false로).
+     */
+    var transcoorded = component.transcoordP2S(point.x, point.y)
+    var diff = transcoorded.x - origin_offset
+
+    var diff_unit = diff / width * widths_sum
+
+    var min_width_unit = (widths_sum / width) * 10 // 10픽셀정도를 최소로
+
+    if(diff_unit < 0)
+      diff_unit = - Math.min(widths[index] - min_width_unit, -diff_unit)
+    else
+      diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
+
+    widths[index] += diff_unit
+    widths[index + 1] -= diff_unit
+
+    component.set('widths', widths)
+  }
+}
+
+var rowControlHandler = {
+  ondragmove: function(point, index, component) {
+    var { left, top, width, height } = component.textBounds
+    var heights_sum = component.heights_sum
+
+    var heights = component.heights.slice()
+
+    /* 컨트롤의 원래 위치를 구한다. */
+    index -= component.columns - 1
+    var origin_pos_unit = heights.slice(0, index + 1).reduce((sum, height) => sum + height, 0)
+    var origin_offset = top + origin_pos_unit / heights_sum * height
+
+    /*
+     * point의 좌표는 부모 레이어 기준의 x, y 값이다.
+     * 따라서, 도형의 회전을 감안한 좌표로의 변환이 필요하다.
+     * Transcoord시에는 point좌표가 부모까지 transcoord되어있는 상태이므로,
+     * 컴포넌트자신에 대한 transcoord만 필요하다.(마지막 파라미터를 false로).
+     */
+    var transcoorded = component.transcoordP2S(point.x, point.y)
+    var diff = transcoorded.y - origin_offset
+
+    var diff_unit = diff / height * heights_sum
+
+    var min_height_unit = (heights_sum / height) * 10 // 10픽셀정도를 최소로
+
+    if(diff_unit < 0)
+      diff_unit = - Math.min(heights[index] - min_height_unit, -diff_unit)
+    else
+      diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
+
+    heights[index] += diff_unit
+    heights[index + 1] -= diff_unit
+
+    component.set('heights', heights)
+  }
+}
+
 export default class TableX extends Container {
 
   constructor(model, context) {
@@ -123,6 +196,8 @@ export default class TableX extends Container {
 
     if(widths.length < this.columns)
       return widths.concat(array(1, this.columns - widths.length))
+    else if(widths.length > this.columns)
+      return widths.slice(0, this.columns)
 
     return widths
   }
@@ -135,6 +210,8 @@ export default class TableX extends Container {
 
     if(heights.length < this.rows)
       return heights.concat(array(1, this.rows - heights.length))
+    else if(heights.length > this.rows)
+      return heights.slice(0, this.rows)
 
     return heights
   }
@@ -335,6 +412,50 @@ export default class TableX extends Container {
 
   get all() {
     return this.components
+  }
+
+  get widths_sum() {
+    var widths = this.widths;
+    return widths ? widths.filter((width, i) => i < this.columns).reduce((sum, width) => sum + width, 0) : this.columns
+  }
+
+  get heights_sum() {
+    var heights = this.heights;
+    return heights ? heights.filter((height, i) => i < this.rows).reduce((sum, height) => sum + height, 0) : this.rows
+  }
+
+  get controls() {
+    var widths = this.widths;
+    var heights = this.heights;
+    var inside = this.textBounds;
+
+    var width_unit = inside.width / this.widths_sum;
+    var height_unit = inside.height / this.heights_sum;
+
+    var x = inside.left;
+    var y = inside.top;
+
+    var controls = [];
+
+    widths.slice(0, this.columns - 1).forEach(width => {
+      x += width * width_unit
+      controls.push({
+        x: x,
+        y: inside.top,
+        handler: columnControlHandler
+      })
+    })
+
+    heights.slice(0, this.rows - 1).forEach(height => {
+      y += height * height_unit
+      controls.push({
+        x: inside.left,
+        y: y,
+        handler: rowControlHandler
+      })
+    })
+
+    return controls
   }
 
   onchange(after, before) {

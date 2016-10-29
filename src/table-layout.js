@@ -1,48 +1,5 @@
 var { Layout } = scene
 
-function parsePadding(padding){
-
-  if(!padding)
-    padding = {
-      top : 0,
-      right : 0,
-      bottom : 0,
-      left : 0
-    }
-
-  if( typeof padding === 'number' )
-    padding = String(padding)
-
-  if( typeof padding === 'string' ) {
-    var padArr = padding.split(' ');
-
-    if( padArr.length === 1 ) {
-      padding = {
-        top : Number(padArr[0]),
-        right : Number(padArr[0]),
-        bottom : Number(padArr[0]),
-        left : Number(padArr[0])
-      }
-    } else if ( padArr.length === 2 ) {
-      padding = {
-        top : Number(padArr[0]),
-        right : Number(padArr[1]),
-        bottom : Number(padArr[0]),
-        left : Number(padArr[1])
-      }
-    } else if ( padArr.length === 4 ) {
-      padding = {
-        top : Number(padArr[0]),
-        right : Number(padArr[1]),
-        bottom : Number(padArr[2]),
-        left : Number(padArr[3])
-      }
-    }
-  }
-
-  return padding;
-}
-
 var TableLayout = {
 
   reflow: function(container) {
@@ -56,10 +13,12 @@ var TableLayout = {
     var widths_sum = widths ? widths.filter((width, i) => i < columns).reduce((sum, width) => sum + width, 0) : columns;
     var heights_sum = heights ? heights.filter((height, i) => i < rows).reduce((sum, height) => sum + height, 0) : rows;
 
-    var padding = parsePadding(container.get("padding"));
+    var inside = container.textBounds;
+    var paddingLeft = container.get('paddingLeft') || 0;
+    var paddingTop = container.get('paddingTop') || 0;
 
-    var width_unit = (container.bounds.width - (padding.left + padding.right)) / widths_sum;
-    var height_unit = (container.bounds.height - (padding.top + padding.bottom)) / heights_sum;
+    var width_unit = inside.width / widths_sum;
+    var height_unit = inside.height / heights_sum;
 
     var x = 0;
     var y = 0;
@@ -69,8 +28,8 @@ var TableLayout = {
       let h = heights ? heights[Math.floor(idx / columns)] : 1
 
       component.bounds = {
-        left : padding.left + x,
-        top : padding.top + y,
+        left : paddingLeft + x,
+        top : paddingTop + y,
         width : width_unit * w,
         height : height_unit * h
       }
