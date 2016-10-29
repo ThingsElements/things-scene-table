@@ -470,6 +470,6 @@ export default class TableX extends Container {
   }
 }
 
-// ["rows", "columns"].forEach(getter => Component.memoize(TableX.prototype, getter, false));
+["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(TableX.prototype, getter, false));
 
 Component.register('table-x', TableX);
