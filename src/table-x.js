@@ -99,6 +99,13 @@ function after(columns, i) {
   return !((i + 1) % columns) ? -1 : i + 1;
 }
 
+function array(value, size) {
+  var arr = []
+  for(let i = 0;i < size;i++)
+    arr.push(0.5 + Math.random(value) / 2)
+  return arr
+}
+
 export default class TableX extends Container {
 
   constructor(model, context) {
@@ -108,7 +115,32 @@ export default class TableX extends Container {
       this.buildCells(model.rows, model.columns, 0, 0);
   }
 
+  get widths() {
+    var widths = this.get('widths')
+
+    if(!widths)
+      return array(1, this.columns)
+
+    if(widths.length < this.columns)
+      return widths.concat(array(1, this.columns - widths.length))
+
+    return widths
+  }
+
+  get heights() {
+    var heights = this.get('heights')
+
+    if(!heights)
+      return array(1, this.rows)
+
+    if(heights.length < this.rows)
+      return heights.concat(array(1, this.rows - heights.length))
+
+    return heights
+  }
+
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
+
     if(newrows < oldrows) {
       let removals = this._components.slice(oldcolumns * newrows);
       this.remove(removals);
@@ -143,6 +175,11 @@ export default class TableX extends Container {
       }
       this.add(newbies);
     }
+
+    this.set({
+      widths: this.widths,
+      heights: this.heights
+    });
   }
 
   get layout() {
@@ -249,6 +286,15 @@ export default class TableX extends Container {
         break;
       case 'clear':
         setCellBorder(cell, CLEAR_STYLE, 'all')
+
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
       }
     })
   }
@@ -303,6 +349,6 @@ export default class TableX extends Container {
   }
 }
 
-["rows", "columns"].forEach(getter => Component.memoize(TableX.prototype, getter, false));
+// ["rows", "columns"].forEach(getter => Component.memoize(TableX.prototype, getter, false));
 
 Component.register('table-x', TableX);
