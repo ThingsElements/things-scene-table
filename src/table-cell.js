@@ -1,6 +1,8 @@
 var {
   Component,
-  RectPath
+  Container,
+  // RectPath,
+  Layout
 } = scene;
 
 const EMPTY_BORDER = {}
@@ -10,7 +12,11 @@ const EMPTY_BORDER = {}
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
  * 3. 데이타를 받을 수 있음.
  */
-export default class TableCell extends RectPath(Component) {
+export default class TableCell extends Container {
+
+  get layout() {
+    return Layout.get(this.get('layout') || 'card')
+  }
 
   get rowspan() {
     return this.get('rowspan')
@@ -53,6 +59,23 @@ export default class TableCell extends RectPath(Component) {
     this._drawBorder(context, left + width, top, left + width, top + height, border.right);
     this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
     this._drawBorder(context, left, top + height, left, top, border.left);
+  }
+
+  _post_draw(context) {
+
+    this.drawFill(context);
+
+    /* 자식 컴포넌트들 그리기 */
+    var { top, left, scale } = this.model;
+    context.translate(left, top);
+
+    this.layout.drawables(this).forEach(m => {
+      m.draw(context);
+    });
+
+    context.translate(-left, -top);
+
+    this.drawText(context);
   }
 }
 

@@ -19,8 +19,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../things-scene-viewer/things-scene-layer.html">
     <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
 
-    <link rel="import" href="../../things-designer-elements/things-editor-color.html">
-    <link rel="import" href="../../things-designer-elements/things-editor-color-stops.html">
+    <link rel="import" href="../../things-designer-elements/things-editor-number-input.html">
+    <link rel="import" href="../../things-designer-elements/things-editor-border.html">
     <link rel="import" href="../../things-scene-modeler/things-scene-properties.html">
 
     <link rel="import" href="./things-scene-table.html">
@@ -35,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     things-scene-viewer {
       display: block;
       width: 1200px;
-      height: 800px;
+      height: 600px;
     }
     </style>
   </head>
@@ -62,116 +62,163 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <fieldset>
           <legend>table properties</legend>
           <label>rows</label>
-          <input type="text" value="{{target.rows::change}}"/>
+          <input is="things-editor-number-input" number="{{target.rows::change}}"/>
           <label>columns</label>
-          <input type="text" value="{{target.columns::change}}"/>
+          <input is="things-editor-number-input" number="{{target.columns::change}}"/>
         </fieldset>
       </things-scene-properties>
+
+      <things-editor-border id="border"
+                            type="{{border.type}}"
+                            border-width="{{border.borderWidth}}"
+                            border-color="{{border.borderColor}}"
+                            border-style="{{border.borderStyle}}"
+                            on-border-type-click="onTypeClick">
+      </things-editor-border>
 
     </template>
 
     <script>
-      window.addEventListener('WebComponentsReady', function(e) {
-        var app = document.querySelector('#app')
+    window.addEventListener('WebComponentsReady', function(e) {
+      var app = document.querySelector('#app')
 
-        app.model = {
-          width: 1200,
-          height: 800,
-          components: [{
-            type: 'table',
-            top: 100,
-            left: 100,
-            width: 500,
-            height: 200,
-            strokeStyle: 'black',
-            fillStyle: 'red',
-            lineWidth: 2,
-            rows: 5,
-            columns: 10,
-            headerCellStyle: {
-              height: 40,
-              fillStyle: 'gray',
-              lineWidth: 15,
-              strokeStyle: 'red',
-              fontColor: 'blue',
-              fontSize: 15,
-              bold: true
-            },
-            cellStyle: [{
-              fontColor: 'green',
-              fontSize: 15,
-              width: 70,
-              // bold: true,
-              strokeStyle: 'blue',
-              lineWidth: 5,
-              fillStyle: {
-                type: 'gradient',
-                gradientType: 'linear',
-                colorStops: [{
-                  position: 0,
-                  color: 'white'
-                }, {
-                  position: 0.5,
-                  color: 'lightgray'
-                }, {
-                  position: 1,
-                  color: 'white'
-                }],
-                rotation: Math.PI / 2,
-              },
-            }, {}, {
-              fontColor: 'green',
-              fontSize: 15,
-              width: 70,
-              // bold: true,
-              strokeStyle: 'blue',
-              lineWidth: 5,
-              fillStyle: {
-                type: 'gradient',
-                gradientType: 'linear',
-                colorStops: [{
-                  position: 0,
-                  color: 'white'
-                }, {
-                  position: 0.5,
-                  color: 'lightgray'
-                }, {
-                  position: 1,
-                  color: 'white'
-                }],
-                rotation: Math.PI / 2,
-              },
-            }],
-            data: [
-              ['header1', 'header2', 'header3'],
-              [100, 200, 300],
-              [1000, 2000, 3000]
-            ]
-          }, {
-            type: 'table',
-            top: 400,
-            left: 100,
-            width: 500,
-            height: 200,
-            strokeStyle: 'black',
-            lineWidth: 2,
-            lineStyle: 'black',
-            rows: 5,
-            columns: 10,
-            headerCellStyle: {
+      app.onTypeClick = function(e) {
+        if(!app.target)
+          return;
 
-            },
-            cellStyle: {
+        let {
+          borderWidth, borderStyle, borderColor
+        } = app.border;
 
+        let table = app.selected[0].parent;
+        if(table.get('type') !== 'table')
+          return;
+
+        table.setCellsStyle(app.selected, {
+          strokeStyle: borderColor,
+          lineDash: borderStyle,
+          lineWidth: borderWidth
+        }, e.detail);
+      }
+
+      app.border = {
+        borderColor: 'green',
+        borderStyle: 'solid',
+        borderWidth: 2
+      }
+
+      app.model = {
+        width: 1200,
+        height: 800,
+        components: [{
+          type: 'ellipse',
+          name: 'select layer 테스트용 원',
+          cx: 45,
+          cy: 30,
+          rotation: 10,
+          rx: 20,
+          ry: 24,
+          strokeStyle: 'black',
+          lineWidth: 1
+        }, {
+          type: 'table',
+          top: 50,
+          left: 100,
+          width: 500,
+          height: 200,
+          strokeStyle: 'black',
+          fillStyle: 'red',
+          lineWidth: 2,
+          rows: 5,
+          columns: 10,
+          headerCellStyle: {
+            height: 40,
+            fillStyle: 'gray',
+            lineWidth: 15,
+            strokeStyle: 'red',
+            fontColor: 'blue',
+            fontSize: 15,
+            bold: true
+          },
+          cellStyle: [{
+            fontColor: 'green',
+            fontSize: 15,
+            width: 70,
+            // bold: true,
+            strokeStyle: 'blue',
+            lineWidth: 5,
+            fillStyle: {
+              type: 'gradient',
+              gradientType: 'linear',
+              colorStops: [{
+                position: 0,
+                color: 'white'
+              }, {
+                position: 0.5,
+                color: 'lightgray'
+              }, {
+                position: 1,
+                color: 'white'
+              }],
+              rotation: Math.PI / 2,
             },
-            data: [
-              ['header1', 'header2', 'header3', 'header1', 'header2', 'header3', 'header1', 'header2', 'header3'],
-              [100, 200, 300, 100, 200, 300, 100, 200, 300],
-              [1000, 2000, 3000]
-            ]
-          }]
-        }
-      });
+          }, {}, {
+            fontColor: 'green',
+            fontSize: 15,
+            width: 70,
+            // bold: true,
+            strokeStyle: 'blue',
+            lineWidth: 5,
+            fillStyle: {
+              type: 'gradient',
+              gradientType: 'linear',
+              colorStops: [{
+                position: 0,
+                color: 'white'
+              }, {
+                position: 0.5,
+                color: 'lightgray'
+              }, {
+                position: 1,
+                color: 'white'
+              }],
+              rotation: Math.PI / 2,
+            },
+          }],
+          data: [
+            ['header1', 'header2', 'header3'],
+            [100, 200, 300],
+            [1000, 2000, 3000]
+          ]
+        }, {
+          type: 'table',
+          top: 300,
+          left: 100,
+          width: 500,
+          height: 200,
+          strokeStyle: 'black',
+          lineWidth: 2,
+          lineStyle: 'black',
+          rows: 5,
+          columns: 10,
+          paddingTop: 4,
+          paddingLeft: 4,
+          paddingRight: 4,
+          paddingBottom: 4,
+          headerCellStyle: {
+
+          },
+          cellStyle: {
+
+          },
+          data: [
+            ['header1', 'header2', 'header3', 'header1', 'header2', 'header3', 'header1', 'header2', 'header3'],
+            [100, 200, 300, 100, 200, 300, 100, 200, 300],
+            [1000, 2000, 3000]
+          ]
+        }]
+      }
+    });
     </script>
   </body>
 </html>
