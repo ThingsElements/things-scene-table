@@ -5,6 +5,19 @@ var {
   Layout
 } = scene;
 
+const NATURE = {
+  mutable: false,
+  resizable: true,
+  rotatable: true,
+  properties : [{
+    type: 'editor-border',
+    label: '',
+    name: '',
+    property: {
+    }
+  }]
+}
+
 const EMPTY_BORDER = {}
 
 /**
@@ -18,6 +31,10 @@ const EMPTY_BORDER = {}
   // get layout() {
   //   return Layout.get(this.get('layout') || 'card')
   // }
+
+  get nature() {
+    return NATURE
+  }
 
   get rowspan() {
     return this.get('rowspan')
