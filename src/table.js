@@ -49,13 +49,13 @@ function buildNewCell(app) {
     width: 1,
     height: 1,
     fillStyle: 'lightgray',
+    // fillStyle: {
+    //   type: 'pattern',
+    //   image: './images/sample.png',
+    //   fitPattern: true
+    // },
     textWrap: true,
-    border: buildBorderStyle(DEFAULT_STYLE, 'all'),
-    fillStyle: {
-      type: 'pattern',
-      image: './images/sample.png',
-      fitPattern: true
-    }
+    border: buildBorderStyle(DEFAULT_STYLE, 'all')
   }, app)
 }
 
