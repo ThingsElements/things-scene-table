@@ -186,11 +186,23 @@ var rowControlHandler = {
 
 export default class Table extends Container {
 
-  constructor(model, context) {
-    super(model, context);
+  created() {
+    var tobeSize = this.rows * this.columns
+    var gap = this.size() - tobeSize
 
-    if(this.size() == 0)
-      this.buildCells(model.rows, model.columns, 0, 0);
+    if(gap == 0) {
+      return
+    } else if(gap > 0) {
+      let removals = this._components.slice(gap);
+      this.remove(removals);
+    } else {
+      let newbies = []
+
+      for(let i = 0;i < -gap;i++)
+        newbies.push(buildNewCell(this.app));
+
+      this.add(newbies);
+    }
   }
 
   get widths() {
