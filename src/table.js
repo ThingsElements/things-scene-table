@@ -48,7 +48,7 @@ function buildNewCell(app) {
     top: 0,
     width: 1,
     height: 1,
-    fillStyle: 'lightgray',
+    // fillStyle: 'lightgray',
     // fillStyle: {
     //   type: 'pattern',
     //   image: './images/sample.png',

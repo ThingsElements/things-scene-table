@@ -62,15 +62,16 @@ const EMPTY_BORDER = {}
       left,
       top,
       width,
-      height,
-      fillStyle
+      height
     } = this.model;
 
     var border = this.model.border || {};
 
     // Cell 채우기.
-    context.fillStyle = fillStyle;
-    context.fillRect(left, top, width, height);
+    context.beginPath();
+    context.lineWidth = 0;
+    context.rect(left, top, width, height);
+    this.drawFill(context);
 
     // Border 그리기
     this._drawBorder(context, left, top, left + width, top, border.top);
