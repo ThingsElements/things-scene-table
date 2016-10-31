@@ -107,7 +107,7 @@ function after(columns, i) {
 function array(value, size) {
   var arr = []
   for(let i = 0;i < size;i++)
-    arr.push(0.5 + Math.random(value) / 2)
+    arr.push(1)
   return arr
 }
 
@@ -203,6 +203,14 @@ export default class Table extends Container {
 
       this.add(newbies);
     }
+
+    var widths = this.get('widths')
+    var heights = this.get('heights')
+
+    if(!widths || widths.length < this.columns)
+      this.set('widths', this.widths)
+    if(!heights || heights.length < this.rows)
+      this.set('heights', this.heights)
   }
 
   get widths() {
