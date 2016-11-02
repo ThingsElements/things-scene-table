@@ -23,7 +23,6 @@ const NATURE = {
     name: 'columns',
     property: 'columns'
   }]
-
 }
 
 const SIDES = {
@@ -465,6 +464,10 @@ export default class Table extends Container {
   get heights_sum() {
     var heights = this.heights;
     return heights ? heights.filter((height, i) => i < this.rows).reduce((sum, height) => sum + height, 0) : this.rows
+  }
+
+  get nature() {
+    return NATURE
   }
 
   get controls() {
