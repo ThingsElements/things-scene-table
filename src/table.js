@@ -8,6 +8,24 @@ var {
   Model
 } = scene;
 
+const NATURE = {
+  mutable: false,
+  resizable: true,
+  rotatable: true,
+  properties : [{
+    type: 'number',
+    label: 'rows',
+    name: 'rows',
+    property: 'rows'
+  }, {
+    type: 'number',
+    label: 'columns',
+    name: 'columns',
+    property: 'columns'
+  }]
+
+}
+
 const SIDES = {
   all: ['top', 'left', 'bottom', 'right'],
   out: ['top', 'left', 'bottom', 'right'],
