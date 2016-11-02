@@ -26,7 +26,7 @@ const CLEAR_STYLE = {
 }
 
 const DEFAULT_STYLE = {
-  strokeStyle: 'red',
+  strokeStyle: '#999',
   lineDash: 'solid',
   lineWidth: 1
 }
