@@ -230,6 +230,11 @@ export default class Table extends Container {
       this.set('heights', this.heights)
   }
 
+  // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
+  get focusible() {
+    return false
+  }
+
   get widths() {
     var widths = this.get('widths')
 
