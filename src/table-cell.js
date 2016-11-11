@@ -15,6 +15,16 @@ const NATURE = {
     name: '',
     property: {
     }
+  }, {
+    type: 'string',
+    label: 'dataKey',
+    name: 'dataKey',
+    property: 'dataKey'
+  }, {
+    type: 'number',
+    label: 'dataIndex',
+    name: 'dataIndex',
+    property: 'dataIndex'
   }]
 }
 

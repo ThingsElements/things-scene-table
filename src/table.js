@@ -203,6 +203,12 @@ var rowControlHandler = {
 
 export default class Table extends Container {
 
+  _draw(ctx) {
+    super._draw(ctx)
+
+    this.setCellsData()
+  }
+
   created() {
     var tobeSize = this.rows * this.columns
     var gap = this.size() - tobeSize
@@ -421,6 +427,52 @@ export default class Table extends Container {
           setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
       }
     })
+  }
+
+  setCellsData() {
+    var data = this.get('data')
+
+    if(!data)
+      return
+
+    data = this.toObjectArrayValue(data)
+
+    var cells = this.components;
+    var columns = this.get('columns');
+
+    cells.forEach(cell => {
+      var dataKey = cell.model.dataKey
+      var dataIndex = cell.model.dataIndex
+      if(dataKey && dataIndex >= 0) {
+        cell.set('text', data[dataIndex][dataKey] || "")
+      }
+    })
+  }
+
+  toObjectArrayValue(array) {
+    if(!array || array.length === 0)
+      return null
+
+    let indexKeyMap = {}
+    let value = []
+
+    for(let key in array[0]) {
+      indexKeyMap[key] = array[0][key]
+    }
+
+    for(var i = 1; i < array.length; i++) {
+      let object = {}
+      let thisObject = array[i]
+      for(let key in indexKeyMap) {
+        let k = indexKeyMap[key];
+        let v = thisObject[key];
+        object[k] = v
+      }
+
+      value.push(object)
+    }
+
+    return value
   }
 
   get columns() {
