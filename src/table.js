@@ -203,12 +203,6 @@ var rowControlHandler = {
 
 export default class Table extends Container {
 
-  _draw(ctx) {
-    super._draw(ctx)
-
-    this.setCellsData()
-  }
-
   created() {
     var tobeSize = this.rows * this.columns
     var gap = this.size() - tobeSize
@@ -569,6 +563,10 @@ export default class Table extends Container {
         before.rows === undefined ? this.get('rows') : before.rows,
         before.columns === undefined ? this.get('columns') : before.columns
       )
+    }
+
+    if(before.data || after.data) {
+      this.setCellsData()
     }
   }
 }
