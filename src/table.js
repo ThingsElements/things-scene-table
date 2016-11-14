@@ -569,6 +569,22 @@ export default class Table extends Container {
       this.setCellsData()
     }
   }
+
+  get eventMap() {
+    return {
+      '(self)': {
+        '(descendant)': {
+          change: this.oncellchanged
+        }
+      }
+    }
+  }
+
+  oncellchanged(after, before) {
+    if(hasAnyProperty(after, "dataKey", "dataIndex")) {
+      this.setCellsData()
+    }
+  }
 }
 
 ["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(Table.prototype, getter, false));
