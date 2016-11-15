@@ -447,6 +447,10 @@ export default class Table extends Container {
     if(!array || array.length === 0)
       return null
 
+    if(!array[0].hasOwnProperty('__field1')) {
+      return array
+    }
+
     let indexKeyMap = {}
     let value = []
 
