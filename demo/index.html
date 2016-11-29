@@ -48,7 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <things-scene-handler type="move-handler"></things-scene-handler>
       </things-scene-viewer>
 
-      <things-editor-properties target="[[selected.0]]" props="[[selected.0.nature.properties]]">
+      <things-editor-properties id='props' target="[[selected.0]]" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
 
     </template>
@@ -56,6 +56,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script>
     window.addEventListener('WebComponentsReady', function(e) {
       var app = document.querySelector('#app')
+
+      app.listen(this.app.$.props, 'table-cell-border-set', 'onTableCellBorderSet')
+
+      app.onTableCellBorderSet = function(e) {
+
+        var {
+          type, borderWidth, borderStyle, borderColor
+        } = e.detail;
+
+        var table = this.selected[0].parent;
+        if(table.get('type') !== 'table')
+          return;
+
+        table.setCellsStyle(this.selected, {
+          strokeStyle: borderColor,
+          lineDash: borderStyle,
+          lineWidth: borderWidth
+        }, type);
+      }
 
       app.onTypeClick = function(e) {
         if(!app.target)
