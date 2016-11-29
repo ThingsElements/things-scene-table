@@ -48,7 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <things-scene-handler type="move-handler"></things-scene-handler>
       </things-scene-viewer>
 
-      <things-editor-properties id='props' target="[[selected.0]]" props="[[selected.0.nature.properties]]">
+      <things-editor-properties id='props' target="{{selected.0.model}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
 
     </template>
@@ -57,7 +57,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     window.addEventListener('WebComponentsReady', function(e) {
       var app = document.querySelector('#app')
 
-      app.listen(this.app.$.props, 'table-cell-border-set', 'onTableCellBorderSet')
+      app.listen(this.app.$.props, 'table-cell-border-set', 'onTableCellBorderSet');
+
+      ['table-delete-row',
+      'table-delete-column',
+      'table-insert-above',
+      'table-insert-below',
+      'table-insert-left',
+      'table-insert-right',
+      'table-merge-cells',
+      'table-split-cells',
+      'table-distribute-horizontal',
+      'table-distribute-vertical'].forEach(function(event) {
+        app.listen(this.app.$.props, event, 'onTableCellEvent')
+      })
+
+      // app.onModelChanged = function(change) {
+      //   console.log('change', change)
+      //   /* 사용자가 선택한 컴포넌트가 바뀐 경우도 호출되므로, 이 경우는 제외한다. */
+      //   if(!this.scene || change.path === 'model' || this.changedByScene)
+      //     return
+      //
+      //   // this.selected[0].set(, change.value)
+      // },
 
       app.onTableCellBorderSet = function(e) {
 
@@ -76,29 +98,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, type);
       }
 
-      app.onTypeClick = function(e) {
-        if(!app.target)
+      app.onTableCellEvent = function(e) {
+        var table = this.selected[0].parent;
+        if(!table || table.get('type') !== 'table')
           return;
 
-        let {
-          borderWidth, borderStyle, borderColor
-        } = app.border;
-
-        let table = app.selected[0].parent;
-        if(table.get('type') !== 'table')
-          return;
-
-        table.setCellsStyle(app.selected, {
-          strokeStyle: borderColor,
-          lineDash: borderStyle,
-          lineWidth: borderWidth
-        }, e.detail);
-      }
-
-      app.border = {
-        borderColor: 'green',
-        borderStyle: 'solid',
-        borderWidth: 2
+        switch(e.type) {
+        case 'table-delete-row':
+          table.deleteRows(this.selected)
+          break;
+        case 'table-delete-column':
+          table.deleteColumns(this.selected)
+          break;
+        case 'table-insert-above':
+          break;
+        case 'table-insert-below':
+          break;
+        case 'table-insert-left':
+          break;
+        case 'table-insert-right':
+          break;
+        case 'table-merge-cells':
+          break;
+        case 'table-split-cells':
+          break;
+        case 'table-distribute-horizontal':
+          break;
+        case 'table-distribute-vertical':
+          break;
+        }
       }
 
       app.model = {

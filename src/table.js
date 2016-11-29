@@ -443,6 +443,64 @@ export default class Table extends Container {
     })
   }
 
+  getRowColumn(cell) {
+    var idx = this.components.indexOf(cell)
+    var length = this.components.length
+
+    return {
+      column: idx % this.columns,
+      row: Math.floor(idx / this.columns)
+    }
+  }
+
+  getCellsByRow(row) {
+    return this.components.slice(row * this.columns, (row + 1) * this.columns)
+  }
+
+  getCellsByColumn(column) {
+    var cells = []
+    for(var i = 0;i < this.rows;i++)
+      cells.push(this.components[this.columns * i + column])
+
+    return cells
+  }
+
+  deleteRows(cells) {
+    var removalRows = []
+
+    cells.forEach((cell) => {
+      let row = this.getRowColumn(cell).row
+      if(-1 == removalRows.indexOf(row))
+        removalRows.push(row)
+    })
+
+    removalRows.reverse().forEach((row) => {
+      this.remove(this.getCellsByRow(row))
+      this.heights.splice(row, 1)
+    })
+
+    this.model.rows -= removalRows.length
+    this.clearCache()
+  }
+
+  deleteColumns(cells) {
+    var removalColumns = []
+
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column
+      if(-1 == removalColumns.indexOf(column))
+        removalColumns.push(column)
+    })
+
+    removalColumns.reverse().forEach((column) => {
+      this.remove(this.getCellsByColumn(column))
+      this.widths.splice(column, 1)
+    })
+
+    this.model.columns -= removalColumns.length
+    this.clearCache()
+  }
+
   toObjectArrayValue(array) {
     if(!array || array.length === 0)
       return null
