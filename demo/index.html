@@ -19,18 +19,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../things-scene-viewer/things-scene-layer.html">
     <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
 
-    <link rel="import" href="../../things-designer-elements/things-editor-number-input.html">
-    <link rel="import" href="../../things-designer-elements/things-editor-border.html">
-    <link rel="import" href="../../things-scene-modeler/things-scene-properties.html">
+    <link rel="import" href="../../things-designer-elements/things-editor-properties.html">
 
     <link rel="import" href="./things-scene-table.html">
 
     <style is="custom-style">
-
-    @font-face {
-      font-family: "Bitstream Vera Serif Bold";
-      src: url("fonts/VeraSeBd.ttf");
-    }
 
     things-scene-viewer {
       display: block;
@@ -55,34 +48,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <things-scene-handler type="move-handler"></things-scene-handler>
       </things-scene-viewer>
 
-      <things-scene-properties scene="[[scene]]"
-                               selected="[[selected]]"
-                               model="{{target}}"
-                               bounds="{{bounds}}">
-        <fieldset>
-          <legend>table properties</legend>
-          <label>rows</label>
-          <input is="things-editor-number-input" number="{{target.rows::change}}"/>
-          <label>columns</label>
-          <input is="things-editor-number-input" number="{{target.columns::change}}"/>
-          <label>top</label>
-          <input is="things-editor-number-input" number="{{target.paddingTop::change}}"/>
-          <label>left</label>
-          <input is="things-editor-number-input" number="{{target.paddingLeft::change}}"/>
-          <label>right</label>
-          <input is="things-editor-number-input" number="{{target.paddingRight::change}}"/>
-          <label>bottom</label>
-          <input is="things-editor-number-input" number="{{target.paddingBottom::change}}"/>
-        </fieldset>
-      </things-scene-properties>
-
-      <things-editor-border id="border"
-                            type="{{border.type}}"
-                            border-width="{{border.borderWidth}}"
-                            border-color="{{border.borderColor}}"
-                            border-style="{{border.borderStyle}}"
-                            on-border-type-click="onTypeClick">
-      </things-editor-border>
+      <things-editor-properties target="[[selected.0]]" props="[[selected.0.nature.properties]]">
+      </things-editor-properties>
 
     </template>
 

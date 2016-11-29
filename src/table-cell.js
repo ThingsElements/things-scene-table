@@ -10,7 +10,7 @@ const NATURE = {
   resizable: true,
   rotatable: true,
   properties : [{
-    type: 'editor-border',
+    type: 'editor-table',
     label: '',
     name: '',
     property: {
