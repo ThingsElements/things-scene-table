@@ -598,7 +598,7 @@ export default class Table extends Container {
 
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
-        newbieCells.push(buildCopiedCell(this.components[column * this.rows + i].model, this.app))
+        newbieCells.push(buildCopiedCell(this.components[column + this.rows * i].model, this.app))
       newbieColumnWidths.push(this.widths[column])
     })
 
@@ -641,7 +641,7 @@ export default class Table extends Container {
 
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
-        newbieCells.push(buildCopiedCell(this.components[column * this.rows + i].model, this.app))
+        newbieCells.push(buildCopiedCell(this.components[column + this.rows * i].model, this.app))
       newbieColumnWidths.push(this.widths[column])
     })
 
