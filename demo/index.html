@@ -111,20 +111,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           table.deleteColumns(this.selected)
           break;
         case 'table-insert-above':
+          table.insertCellsAbove(this.selected)
           break;
         case 'table-insert-below':
+          table.insertCellsBelow(this.selected)
           break;
         case 'table-insert-left':
+          table.insertCellsLeft(this.selected)
           break;
         case 'table-insert-right':
+          table.insertCellsRight(this.selected)
           break;
         case 'table-merge-cells':
           break;
         case 'table-split-cells':
           break;
         case 'table-distribute-horizontal':
+          table.distributeHorizontal(this.selected)
           break;
         case 'table-distribute-vertical':
+        table.distributeVertical(this.selected)
           break;
         }
       }

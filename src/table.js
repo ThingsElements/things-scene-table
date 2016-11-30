@@ -76,6 +76,12 @@ function buildNewCell(app) {
   }, app)
 }
 
+function buildCopiedCell(copy, app) {
+  var obj = JSON.parse(JSON.stringify(copy))
+  delete obj.text
+  return Model.compile(obj, app)
+}
+
 function buildBorderStyle(style, where) {
   return (SIDES[where] || []).reduce((border, side) => {
     border[side] = style
@@ -157,8 +163,8 @@ var columnControlHandler = {
     else
       diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
 
-    widths[index] += diff_unit
-    widths[index + 1] -= diff_unit
+    widths[index] = Math.round((widths[index] + diff_unit) * 100) / 100
+    widths[index + 1] = Math.round((widths[index + 1] - diff_unit) * 100) / 100
 
     component.set('widths', widths)
   }
@@ -194,8 +200,8 @@ var rowControlHandler = {
     else
       diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
 
-    heights[index] += diff_unit
-    heights[index + 1] -= diff_unit
+    heights[index] = Math.round((heights[index] + diff_unit) * 100) / 100
+    heights[index + 1] = Math.round((heights[index + 1] - diff_unit) * 100) / 100
 
     component.set('heights', heights)
   }
@@ -474,13 +480,14 @@ export default class Table extends Container {
         removalRows.push(row)
     })
 
+    var heights = this.heights.slice()
     removalRows.reverse().forEach((row) => {
       this.remove(this.getCellsByRow(row))
-      this.heights.splice(row, 1)
+      heights.splice(row, 1)
     })
 
-    this.model.rows -= removalRows.length
-    this.clearCache()
+    this.model.rows -= removalRows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('heights', heights)
   }
 
   deleteColumns(cells) {
@@ -492,13 +499,215 @@ export default class Table extends Container {
         removalColumns.push(column)
     })
 
+    var widths = this.widths.slice()
     removalColumns.reverse().forEach((column) => {
       this.remove(this.getCellsByColumn(column))
-      this.widths.splice(column, 1)
+      widths.splice(column, 1)
     })
 
-    this.model.columns -= removalColumns.length
+    this.model.columns -= removalColumns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('widths', widths)
+  }
+
+  insertCellsAbove(cells) {
+    var rows = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == rows.indexOf(rowcolumn.row))
+        rows.push(rowcolumn.row)
+    })
+
+    rows.sort()
+    var insertionRowPosition = rows[0]
+
+    var newbieRowHeights = []
+    var newbieCells = []
+
+    rows.forEach((row) => {
+      for(let i = 0;i < this.columns;i++)
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
+      newbieRowHeights.push(this.heights[row])
+    })
+
+    newbieCells.reverse().forEach((cell) => {
+      this.insertComponentAt(cell, insertionRowPosition * this.columns);
+    })
+
+    var heights = this.heights.slice()
+    heights.splice(insertionRowPosition, 0, ...newbieRowHeights)
+    this.set('heights', heights)
+
+    this.model.rows += rows.length
+
     this.clearCache()
+  }
+
+  insertCellsBelow(cells) {
+    var rows = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == rows.indexOf(rowcolumn.row))
+        rows.push(rowcolumn.row)
+    })
+
+    rows.sort()
+    // Insert Above와 이 부분만 다르다.
+    var insertionRowPosition = rows[rows.length - 1] + 1
+
+    var newbieRowHeights = []
+    var newbieCells = []
+
+    rows.forEach((row) => {
+      for(let i = 0;i < this.columns;i++)
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
+      newbieRowHeights.push(this.heights[row])
+    })
+
+    newbieCells.reverse().forEach((cell) => {
+      this.insertComponentAt(cell, insertionRowPosition * this.columns);
+    })
+
+    var heights = this.heights.slice()
+    heights.splice(insertionRowPosition, 0, ...newbieRowHeights)
+    this.set('heights', heights)
+
+    this.model.rows += rows.length
+
+    this.clearCache()
+  }
+
+  insertCellsLeft(cells) {
+    var columns = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == columns.indexOf(rowcolumn.column))
+        columns.push(rowcolumn.column)
+    })
+
+    columns.sort()
+    var insertionColumnPosition = columns[0]
+
+    var newbieColumnWidths = []
+    var newbieCells = []
+
+    columns.forEach((column) => {
+      for(let i = 0;i < this.rows;i++)
+        newbieCells.push(buildCopiedCell(this.components[column * this.rows + i].model, this.app))
+      newbieColumnWidths.push(this.widths[column])
+    })
+
+    var increasedColumns = this.columns
+    var index = this.rows
+    newbieCells.reverse().forEach((cell) => {
+      if(index == 0) {
+        index = this.rows
+        increasedColumns++
+      }
+
+      index--
+      this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+    })
+
+    var widths = this.widths.slice()
+    this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
+
+    this.set('widths', widths)
+  }
+
+  insertCellsRight(cells) {
+    var columns = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == columns.indexOf(rowcolumn.column))
+        columns.push(rowcolumn.column)
+    })
+
+    columns.sort()
+    // Insert Left와 이 부분만 다르다.
+    var insertionColumnPosition = columns[columns.length - 1] + 1
+
+    var newbieColumnWidths = []
+    var newbieCells = []
+
+    columns.forEach((column) => {
+      for(let i = 0;i < this.rows;i++)
+        newbieCells.push(buildCopiedCell(this.components[column * this.rows + i].model, this.app))
+      newbieColumnWidths.push(this.widths[column])
+    })
+
+    var increasedColumns = this.columns
+    var index = this.rows
+    newbieCells.reverse().forEach((cell) => {
+      if(index == 0) {
+        index = this.rows
+        increasedColumns++
+      }
+
+      index--
+      this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+    })
+
+    var widths = this.widths.slice()
+    this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
+    this.set('widths', widths)
+  }
+
+  distributeHorizontal(cells) {
+    var columns = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == columns.indexOf(rowcolumn.column))
+        columns.push(rowcolumn.column)
+    })
+
+    var sum = columns.reduce((sum, column) => {
+      return sum + this.widths[column]
+    }, 0)
+
+    var newval = Math.round((sum / columns.length) * 100) / 100
+    var widths = this.widths.slice()
+    columns.forEach((column) => {
+      widths[column] = newval
+    })
+
+    this.set('widths', widths)
+  }
+
+  distributeVertical(cells) {
+    var rows = []
+
+    cells.forEach((cell) => {
+      let rowcolumn = this.getRowColumn(cell)
+
+      if(-1 == rows.indexOf(rowcolumn.row))
+        rows.push(rowcolumn.row)
+    })
+
+    var sum = rows.reduce((sum, row) => {
+      return sum + this.heights[row]
+    }, 0)
+
+    var newval = Math.round((sum / rows.length) * 100) / 100
+    var heights = this.heights.slice()
+    rows.forEach((row) => {
+      heights[row] = newval
+    })
+
+    this.set('heights', heights)
   }
 
   toObjectArrayValue(array) {
