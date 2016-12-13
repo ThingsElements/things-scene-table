@@ -435,7 +435,7 @@ export default class Table extends Container {
     if(!data)
       return
 
-    data = this.toObjectArrayValue(data)
+    data = this.toObjectArrayValue(data) || []
 
     var cells = this.components;
     var columns = this.get('columns');
@@ -444,7 +444,8 @@ export default class Table extends Container {
       var dataKey = cell.model.dataKey
       var dataIndex = cell.model.dataIndex
       if(dataKey && dataIndex >= 0) {
-        cell.set('text', data[dataIndex][dataKey] || "")
+        var currentData = data[dataIndex] || {}
+        cell.set('text', currentData[dataKey] || "")
       }
     })
   }
