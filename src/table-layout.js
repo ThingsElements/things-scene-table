@@ -57,6 +57,36 @@ var TableLayout = {
     return true
   },
 
+  keyNavigate: function(container, component, e) {
+    var layoutConfig = container.get('layoutConfig')
+
+    var columns = (layoutConfig && layoutConfig.columns) || container.get('columns')
+    var rows = (layoutConfig && layoutConfig.rows) || container.get('rows')
+
+    var { row, column } = container.getRowColumn(component)
+
+    switch(e.code) {
+    case 'ArrowUp':
+    if(row > 0)
+      return container.getAt((row - 1) * columns + column)
+    break;
+    case 'ArrowDown':
+    if(row < rows - 1)
+      return container.getAt((row + 1) * columns + column)
+    break;
+    case 'ArrowRight':
+    if(column < columns - 1)
+      return container.getAt(row * columns + column + 1)
+    break;
+    case 'ArrowLeft':
+    if(column > 0)
+      return container.getAt(row * columns + column - 1)
+    break;
+    default:
+      return component
+    }
+  },
+
   /*
    * 하위 컴포넌트를 영역으로 선택하는 경우에, 바운드에 join만 되어도 선택된 것으로 판단하도록 한다.
    * joinType이 false이거나, 정의되어있지 않으면, 바운드에 포함되어야 선택된 것으로 판단한다.
