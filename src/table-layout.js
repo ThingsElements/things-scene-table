@@ -57,6 +57,12 @@ var TableLayout = {
     return true
   },
 
+  /*
+   * 레이아웃별로, 키보드 방향키 등을 사용해서 네비게이션 할 수 있는 기능을 제공할 수 있다.
+   * 하나의 컴포넌트만 선택되어있고, 키보드 이벤트가 발생했을 때 호출되게 된다.
+   * keyNavigate 메쏘드가 정의되어 있지 않으면, 'Tab' 키에 대한 네비게이션만 작동한다.
+   * 'Tab'키에 의한 네비게이션은 모든 레이아웃에 공통으로 적용된다.
+   */
   keyNavigate: function(container, component, e) {
     var layoutConfig = container.get('layoutConfig')
 
