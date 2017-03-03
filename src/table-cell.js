@@ -42,6 +42,16 @@ const EMPTY_BORDER = {}
   //   return Layout.get(this.get('layout') || 'card')
   // }
 
+  get merged() {
+    return this.get('merged')
+  }
+
+  set merged(merged) {
+    this.set('merged', !!merged)
+    if(merged)
+      this.set('text', '')
+  }
+
   get nature() {
     return NATURE
   }
@@ -50,8 +60,32 @@ const EMPTY_BORDER = {}
     return this.get('rowspan')
   }
 
+  set rowspan(rowspan) {
+    this.set('rowspan', rowspan)
+  }
+
   get colspan() {
     return this.get('colspan')
+  }
+
+  set colspan(colspan) {
+    this.set('colspan', colspan)
+  }
+
+  // set superCell(isSuper) {
+  //   this._superCell = isSuper;
+  // }
+  //
+  // get superCell() {
+  //   return this._superCell;
+  // }
+
+  set superCell(superCell) {
+    this.set('superCell', superCell);
+  }
+
+  get superCell() {
+    return this.get('superCell');
   }
 
   get border() {
@@ -72,7 +106,8 @@ const EMPTY_BORDER = {}
       left,
       top,
       width,
-      height
+      height,
+      merged
     } = this.model;
 
     var border = this.model.border || {};
@@ -88,6 +123,10 @@ const EMPTY_BORDER = {}
     this._drawBorder(context, left + width, top, left + width, top + height, border.right);
     this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
     this._drawBorder(context, left, top + height, left, top, border.left);
+  }
+
+  get capturable() {
+    return super.capturable && !this.merged
   }
 
   // _post_draw(context) {

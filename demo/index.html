@@ -123,8 +123,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           table.insertCellsRight(this.selected)
           break;
         case 'table-merge-cells':
+          table.mergeCells(this.selected)
           break;
         case 'table-split-cells':
+          table.splitCells(this.selected)
           break;
         case 'table-distribute-horizontal':
           table.distributeHorizontal(this.selected)
