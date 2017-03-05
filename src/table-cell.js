@@ -88,6 +88,14 @@ const EMPTY_BORDER = {}
     return this.get('superCell');
   }
 
+  set superPos(superPos) {
+    this.set('superPos', superPos);
+  }
+
+  get superPos() {
+    return this.get('superPos');
+  }
+
   get border() {
     var border = this.model.border || EMPTY_BORDER;
   }
