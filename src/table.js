@@ -611,7 +611,7 @@ export default class Table extends Container {
     console.log('columnsMerged', columnsMerged);
 
     let notColumnsMerged = [];
-    // 병합된 열과 병합되지 않은 열을 따로 삭제하기 위해 열을 서로 분리한다.
+    // 병합된 열과 병합되지 않은 열을 부모 셀의 위치를 재정의 하기 위해 서로 분리한다.
     removalColumns.forEach((column) => {
       if(-1 == columnsMerged.indexOf(column))
         notColumnsMerged.push(column);
@@ -634,8 +634,19 @@ export default class Table extends Container {
     // columnsMerged의 첫 번째 값과 parentCellColumn 값이 같으면
     // 부모셀의 위치를 우측으로 이동하고 rowspan colspan 값을 재지정 해야한다.
     if(columnsMerged[0] == parentCellColumn){
-      //부모 셀의 인덱스 값 구하기
-      console.log('parent index', parentCellColumn + this.columns * parentCellRow);
+      // 부모 셀의 인덱스 값 구하기
+      var parentCellIndex = parentCellColumn + this.columns * parentCellRow;
+      // (부모 셀의 인덱스 + columnsMerged의 길이)의 인덱스의 셀을 부모로 지정
+      var newParentCell = this.components[parentCellIndex + columnsMerged.length];
+      newParentCell.merged = false;
+      newParentCell.superCell = true;
+      newParentCell.colspan = parentCell.colspan - columnsMerged.length;
+      newParentCell.rowspan = parentCell.rowspan;
+      // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
+      newParentCell.set('text', parentCell.get('text'));
+      // columnsMerged가 있는 경우
+    } else if (columnsMerged.length > 0) {
+      parentCell.colspan -= columnsMerged.length;
     }
 
     ////
