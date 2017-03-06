@@ -514,47 +514,6 @@ export default class Table extends Container {
     return cells;
   }
 
-  // 매개변수로 받은 셀 배열에서 병합된 셀을 찾고, 찾은 셀 중에서 가장 첫 번째(left,top) 셀을 구한다.
-  // case 1. 만약 찾은 셀이 병합한 셀들 중 부모 셀(super === true)이라면 그 셀을 바로 리턴한다.
-  // case 2. 찾은 셀 중에서 가장 첫 번째 셀 위치에서 위 또는 좌측으로 가면서 부모 셀을 구한다.
-  findParentCellMerged(cells, direction){
-    var cellsMerged = [];
-    cells.forEach((cell) => {
-      if(cell.merged == true && cell.superCell != true)
-        cellsMerged.push(cell);
-      else if(cell.superCell == true)
-        return cell;
-    });
-
-    var firstCell = cellsMerged[0];
-    var firstCellColumn = this.getRowColumn(firstCell).column;
-    var firstCellRow = this.getRowColumn(firstCell).row;
-    var firstCellIndex = (this.columns * firstCellRow) + firstCellColumn;
-
-    console.log('col', firstCellColumn);
-    console.log('row', firstCellRow);
-    console.log('index', firstCellIndex);
-
-    // 좌측으로 찾는 경우, 즉 deleteColumns 인 경우
-    if(direction == 1){
-      for(let i = (firstCellIndex - 1); i >= 0; i--){
-        if(this.components[i].superCell == true)
-          return this.components[i];
-      }
-    }
-
-    // 위쪽으로 찾는 경우, 즉 deleteRows 인 경우
-    if(direction == 2){
-      for(let i = firstCellIndex - this.columns; i >= 0; i -= this.columns){
-        if(this.components[i].superCell == true)
-          return this.components[i];
-      }
-    }
-
-    // 부모 셀이 없는 경우
-    return false;
-  }
-
   findParentCells(cells){
     // 부모의 위치 별로 배열 생성
     var superCellIndexes = [];
@@ -647,85 +606,6 @@ export default class Table extends Container {
 
     console.log('notColumnsMerged', notColumnsMerged);
 
-
-
-    // 부모셀의 첫 번째 column 값과 merged의 첫 번째 column값이 같으면
-    // 부모셀이 삭제된다. 따라서 위 조건을 판단하는 로직이 필요하다.
-
-    // try1
-    // 부모셀 구하기
-    // var parentCell = this.findParentCellMerged(cellsOfColumns, 1);
-    // console.log('parentCell, row', this.getRowColumn(parentCell).row);
-    // console.log('parentCell, col', this.getRowColumn(parentCell).column);
-    // var parentCellColumn = this.getRowColumn(parentCell).column;
-    // var parentCellRow = this.getRowColumn(parentCell).row;
-    //
-    // // columnsMerged의 첫 번째 값과 parentCellColumn 값이 같으면
-    // // 부모셀의 위치를 우측으로 이동하고 rowspan colspan 값을 재지정 해야한다.
-    // if(columnsMerged[0] == parentCellColumn){
-    //   // 부모 셀의 인덱스 값 구하기
-    //   var parentCellIndex = parentCellColumn + this.columns * parentCellRow;
-    //   // (부모 셀의 인덱스 + columnsMerged의 길이)의 인덱스의 셀을 부모로 지정
-    //   var newParentCell = this.components[parentCellIndex + columnsMerged.length];
-    //   newParentCell.merged = false;
-    //   newParentCell.superCell = true;
-    //   newParentCell.colspan = parentCell.colspan - columnsMerged.length;
-    //   newParentCell.rowspan = parentCell.rowspan;
-    //   // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
-    //   newParentCell.set('text', parentCell.get('text'));
-    //   // columnsMerged가 있는 경우
-    // } else if (columnsMerged.length > 0) {
-    //   parentCell.colspan -= columnsMerged.length;
-    // }
-
-    // try2
-    // 부모 셀 구하기
-    // var parentCells = this.findParentCells(cellsOfColumns);
-    // console.log(parentCells);
-    // //
-    // parentCells.forEach((parentCell) => {
-    //   let parentCellColumn = this.getRowColumn(parentCell).column;
-    //   let parentCellRow = this.getRowColumn(parentCell).row;
-    //   let parentCellColSpan = parentCell.colspan;
-    //   console.log(parentCellColumn);
-    //   console.log('columnsMerged[0]', columnsMerged[0]);
-    //   let check = false;
-    //   columnsMerged.forEach((columnMerged) => {
-    //     if(parentCellColumn == columnMerged){
-    //       // 부모 셀의 인덱스 값 구하기
-    //       let parentCellIndex = parentCellColumn + this.columns * parentCellRow;
-    //       // columnMerged == parentCellColumn 인 순간부터 columnsMerged 자른다.
-    //       let startIndex = columnsMerged.indexOf(columnMerged);
-    //       let sliceIndex = columnsMerged.slice(startIndex, columnsMerged.length);
-    //
-    //       let newParentCell = this.components[parentCellIndex + sliceIndex.length];
-    //       newParentCell.merged = false;
-    //       newParentCell.superCell = true;
-    //
-    //       newParentCell.colspan = parentCellColSpan - sliceIndex.length;
-    //       newParentCell.rowspan = parentCell.rowspan;
-    //       if(newParentCell.colspan < 2)
-    //         newParentCell.superCell = false;
-    //       // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
-    //       newParentCell.set('text', parentCell.get('text'));
-    //       check = true;
-    //     } else if(check == false) {
-    //       // 병합 셀들의 오른쪽 끝 열
-    //       let rightColumn = parentCellColumn + parentCellColSpan - 1;
-    //       if(rightColumn < removalColumns[removalColumns.length-1]){
-    //         let sliceIndex = removalColumns.slice(0, rightColumn - removalColumns[0] + 1);
-    //         console.log('sliceIndex', sliceIndex);
-    //         parentCell.colspan = parentCellColSpan - sliceIndex.length;
-    //       } else {
-    //         parentCell.colspan = parentCellColSpan - columnsMerged.length;
-    //       }
-    //       if(parentCell.colspan < 2)
-    //         parentCell.superCell = false;
-    //       console.log('last', columnsMerged[columnsMerged.length-1]);
-    //       console.log('first', columnsMerged[0]);
-    //     }
-    //   });
-    // });
     ////////////////////////
 
     // try3
