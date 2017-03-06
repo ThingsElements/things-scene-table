@@ -628,8 +628,8 @@ export default class Table extends Container {
 
     cellsOfColumns.forEach((cell) => {
       let column = this.getRowColumn(cell).column;
-      console.log('column', this.getRowColumn(cell).column);
-      console.log('row', this.getRowColumn(cell).row);
+      //console.log('column', this.getRowColumn(cell).column);
+      //console.log('row', this.getRowColumn(cell).row);
       if(cell.merged == true || cell.superCell == true)
         if(-1 == columnsMerged.indexOf(column))
           columnsMerged.push(column);
@@ -652,6 +652,7 @@ export default class Table extends Container {
     // 부모셀의 첫 번째 column 값과 merged의 첫 번째 column값이 같으면
     // 부모셀이 삭제된다. 따라서 위 조건을 판단하는 로직이 필요하다.
 
+    // try1
     // 부모셀 구하기
     // var parentCell = this.findParentCellMerged(cellsOfColumns, 1);
     // console.log('parentCell, row', this.getRowColumn(parentCell).row);
@@ -677,45 +678,86 @@ export default class Table extends Container {
     //   parentCell.colspan -= columnsMerged.length;
     // }
 
+    // try2
+    // 부모 셀 구하기
+    // var parentCells = this.findParentCells(cellsOfColumns);
+    // console.log(parentCells);
+    // //
+    // parentCells.forEach((parentCell) => {
+    //   let parentCellColumn = this.getRowColumn(parentCell).column;
+    //   let parentCellRow = this.getRowColumn(parentCell).row;
+    //   let parentCellColSpan = parentCell.colspan;
+    //   console.log(parentCellColumn);
+    //   console.log('columnsMerged[0]', columnsMerged[0]);
+    //   let check = false;
+    //   columnsMerged.forEach((columnMerged) => {
+    //     if(parentCellColumn == columnMerged){
+    //       // 부모 셀의 인덱스 값 구하기
+    //       let parentCellIndex = parentCellColumn + this.columns * parentCellRow;
+    //       // columnMerged == parentCellColumn 인 순간부터 columnsMerged 자른다.
+    //       let startIndex = columnsMerged.indexOf(columnMerged);
+    //       let sliceIndex = columnsMerged.slice(startIndex, columnsMerged.length);
+    //
+    //       let newParentCell = this.components[parentCellIndex + sliceIndex.length];
+    //       newParentCell.merged = false;
+    //       newParentCell.superCell = true;
+    //
+    //       newParentCell.colspan = parentCellColSpan - sliceIndex.length;
+    //       newParentCell.rowspan = parentCell.rowspan;
+    //       if(newParentCell.colspan < 2)
+    //         newParentCell.superCell = false;
+    //       // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
+    //       newParentCell.set('text', parentCell.get('text'));
+    //       check = true;
+    //     } else if(check == false) {
+    //       // 병합 셀들의 오른쪽 끝 열
+    //       let rightColumn = parentCellColumn + parentCellColSpan - 1;
+    //       if(rightColumn < removalColumns[removalColumns.length-1]){
+    //         let sliceIndex = removalColumns.slice(0, rightColumn - removalColumns[0] + 1);
+    //         console.log('sliceIndex', sliceIndex);
+    //         parentCell.colspan = parentCellColSpan - sliceIndex.length;
+    //       } else {
+    //         parentCell.colspan = parentCellColSpan - columnsMerged.length;
+    //       }
+    //       if(parentCell.colspan < 2)
+    //         parentCell.superCell = false;
+    //       console.log('last', columnsMerged[columnsMerged.length-1]);
+    //       console.log('first', columnsMerged[0]);
+    //     }
+    //   });
+    // });
+    ////////////////////////
+
+    // try3
     // 부모 셀 구하기
     var parentCells = this.findParentCells(cellsOfColumns);
-    console.log(parentCells);
-    //
+
     parentCells.forEach((parentCell) => {
       let parentCellColumn = this.getRowColumn(parentCell).column;
       let parentCellRow = this.getRowColumn(parentCell).row;
-      console.log(parentCellColumn);
-      console.log('columnsMerged[0]', columnsMerged[0]);
-      columnsMerged.forEach((columnMerged) => {
-        if(parentCellColumn == columnMerged){
-          // 부모 셀의 인덱스 값 구하기
-          let parentCellIndex = parentCellColumn + this.columns * parentCellRow;
-          // columnMerged == parentCellColumn 인 순간부터 columnsMerged 자른다.
-          let startIndex = columnsMerged.indexOf(columnMerged);
-          let sliceIndex = columnsMerged.slice(startIndex, columnsMerged.length);
-
-          let newParentCell = this.components[parentCellIndex + sliceIndex.length];
-          newParentCell.merged = false;
-          newParentCell.superCell = true;
-
-          newParentCell.colspan = parentCell.colspan - sliceIndex.length;
-          newParentCell.rowspan = parentCell.rowspan;
-          // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
-          newParentCell.set('text', parentCell.get('text'));
-        } else {
-          // 병합 셀들의 오른쪽 끝 열
-          let rightColumn = parentCellColumn + parentCell.colspan - 1;
-          if(rightColumn < removalColumns[removalColumns.length-1]){
-            let sliceIndex = removalColumns.slice(0, rightColumn - removalColumns[0] + 1);
-            console.log('sliceIndex', sliceIndex);
-            parentCell.colspan = parentCell.colspan - sliceIndex.length;
-          }
-          console.log('last', columnsMerged[columnsMerged.length-1]);
-          console.log('first', columnsMerged[0]);
-        }
-      });
-      // if(columnsMerged[0] == parentCellColumn)
-      //   console.log(parentCellColumn);
+      let parentCellLastColumn = parentCellColumn + parentCell.colspan - 1;
+      console.log('parentCellColumn : ' + parentCellColumn + ', parentCellRow : ' + parentCellRow);
+      console.log('parentCellLastColumn : ' + parentCellLastColumn);
+      // 병합된 첫 번째 열이 지우려는 영역의 첫 번째 열보다 큰 경우
+      // 부모 셀을 이동 하는 로직을 포함
+      if(parentCellColumn >= removalColumns[0] && parentCellLastColumn > removalColumns[removalColumns.length-1]){
+        console.log('case 1');
+        let newParentCell = this.components[this.columns * parentCellRow + columnsMerged[columnsMerged.length-1] + 1];
+        console.log('newParentCell row : ' + this.getRowColumn(newParentCell).row + ', newParentCell column : ' + this.getRowColumn(newParentCell).column);
+        newParentCell.merged = false;
+        newParentCell.superCell = true;
+        newParentCell.colspan = parentCell.colspan - columnsMerged.length;
+        newParentCell.rowspan = parentCell.rowspan;
+        console.log('newParentCell.colspan', newParentCell.colspan);
+        if(newParentCell.colspan < 2)
+          newParentCell.superCell = false;
+        // 원래 부모 셀에 있던 text도 새로운 부모 셀로 전달한다.
+        newParentCell.set('text', parentCell.get('text'));
+      }
+      // 병합된 첫 번째 열이 지우려는 영역의 첫 번째 열보다 작은 경우
+      else if(parentCellColumn < removalColumns[0]){
+        console.log('case 2');
+      }
     });
 
     ////
