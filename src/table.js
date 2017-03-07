@@ -612,6 +612,7 @@ export default class Table extends Container {
         objInfo.colspan = parentCell.colspan;
         objInfo.rowspan = parentCell.rowspan;
         objInfo.superPos = parentCell.superPos;
+        objInfo.text = parentCell.get('text');
         parentCellsInfo.push(objInfo);
       });
     }
@@ -670,14 +671,26 @@ export default class Table extends Container {
         if(-1 == infoColumns.indexOf(col))
           notMerColumns.push(col);
       });
+      notMerColumns.sort((a, b) => {
+        return a - b;
+      });
       console.log('notMerColumns',notMerColumns);
+      if(notMerColumns[0] < infoColumns[0]){
+        for(let j = info.row; j < info.row + info.rowspan; j++)
+          for(let i = info.col - notMerColumns.length; i < info.col - notMerColumns.length + info.colspan - dupColumns.length; i++){
+            willMergeCells.push(this.getCellByRowColumn(j, i));
+          }
+      } else {
+        for(let j = info.row; j < info.row + info.rowspan; j++)
+          for(let i = info.col; i < info.col + info.colspan - dupColumns.length; i++){
+            willMergeCells.push(this.getCellByRowColumn(j, i));
+          }
+      }
 
-      for(let j = info.row; j < info.row + info.rowspan; j++)
-        for(let i = info.col - notMerColumns.length; i < info.col - notMerColumns.length + info.colspan - dupColumns.length; i++){
-          willMergeCells.push(this.getCellByRowColumn(j, i));
-        }
       this.mergeCells(willMergeCells);
-
+      if(willMergeCells.length > 1){
+        willMergeCells[0].set('text', info.text);
+      }
     });
   }
 
