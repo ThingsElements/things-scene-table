@@ -559,7 +559,9 @@ export default class Table extends Container {
       if(-1 == removalRows.indexOf(row))
         removalRows.push(row);
     });
-    removalRows.sort();
+    removalRows.sort((a, b) => {
+      return a - b;
+    });
 
     // 만약 removalRows가 연속적인 숫자가 아니라면 리턴한다.
     if ((removalRows.length - 1) !== (removalRows[removalRows.length - 1] - removalRows[0]))
@@ -675,7 +677,9 @@ export default class Table extends Container {
       if(-1 == removalColumns.indexOf(column))
         removalColumns.push(column);
     });
-    removalColumns.sort();
+    removalColumns.sort((a, b) => {
+      return a - b;
+    });
 
     // 만약 removalColumns가 연속적인 숫자가 아니라면 리턴한다.
     if ((removalColumns.length - 1) !== (removalColumns[removalColumns.length - 1] - removalColumns[0]))
