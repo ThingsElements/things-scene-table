@@ -551,31 +551,111 @@ export default class Table extends Container {
   }
 
   deleteRows(cells) {
-    var getCells = this.getColumnCellsAtSelCells(cells);
-    var parentsCell = this.findParentCells(getCells);
-    parentsCell.forEach((parentCell) => {
-      let parentCellColumn = this.getRowColumn(parentCell).column;
-      let parentCellRow = this.getRowColumn(parentCell).row;
-      console.log('parentCellColumn : ' + parentCellColumn + ', parentCellRow : ' + parentCellRow);
+    // 선택한 행을 구한다.
+    let removalRows = [];
+
+    cells.forEach((cell) => {
+      let row = this.getRowColumn(cell).row;
+      if(-1 == removalRows.indexOf(row))
+        removalRows.push(row);
+    });
+    removalRows.sort();
+
+    // 만약 removalRows가 연속적인 숫자가 아니라면 리턴한다.
+    if ((removalRows.length - 1) !== (removalRows[removalRows.length - 1] - removalRows[0]))
+      return;
+
+    // 모든 셀을 가져오고 병합된 셀을 가져옴
+    let cellsOfRows = this.getRowCellsAtSelCells(this.components);
+    // 모든 셀에서 병합된 셀을 가져옴
+    let cellsMerged = this.getCellsMerged(cellsOfRows);
+    let rowsMerged = [];
+    cellsOfRows.forEach((cell) => {
+      let row = this.getRowColumn(cell).row;
+      if(cell.merged == true || cell.superCell == true)
+        if(-1 == rowsMerged.indexOf(row))
+          rowsMerged.push(row);
+    });
+    console.log(rowsMerged);
+    // 선택한 행에서 병합된 셀이 있다면
+    let parentCellsInfo = [];
+    if(cellsMerged.length > 0) {
+      // 부모 셀의 정보를 다음에 병합할 때 사용하기 위해 미리 저장한다.
+      let parentCells = this.findParentCells(cellsMerged);
+      parentCells.forEach((parentCell) => {
+        let objInfo = {};
+        objInfo.col = this.getRowColumn(parentCell).column;
+        objInfo.row = this.getRowColumn(parentCell).row;
+        objInfo.colspan = parentCell.colspan;
+        objInfo.rowspan = parentCell.rowspan;
+        objInfo.superPos = parentCell.superPos;
+        objInfo.text = parentCell.get('text');
+        parentCellsInfo.push(objInfo);
+      });
+    }
+
+    console.log(parentCellsInfo);
+
+    // 모든 셀 분할
+    this.components.forEach((cell) => {
+      cell.colspan = 1;
+      cell.rowspan = 1;
+      cell.merged = false;
+      cell.superPos = -2;
+      cell.superCell = false;
     });
 
+    let heights = this.heights.slice();
 
-    // var removalRows = []
-    //
-    // cells.forEach((cell) => {
-    //   let row = this.getRowColumn(cell).row
-    //   if(-1 == removalRows.indexOf(row))
-    //     removalRows.push(row)
-    // })
-    //
-    // var heights = this.heights.slice()
-    // removalRows.reverse().forEach((row) => {
-    //   this.remove(this.getCellsByRow(row))
-    //   heights.splice(row, 1)
-    // })
-    //
-    // this.model.rows -= removalRows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    // this.set('heights', heights)
+    removalRows.reverse().forEach((row) => {
+      this.remove(this.getCellsByRow(row));
+      heights.splice(row, 1);
+    })
+
+    this.model.rows -= removalRows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('heights', heights);
+
+    // 다시 병합한다.
+    parentCellsInfo.forEach((info) => {
+      let willMergeCells = [];
+      let infoRows = [];
+      for(let i = info.row; i < info.row + info.rowspan; i++)
+        infoRows.push(i);
+      console.log('infoRows', infoRows);
+      let dupRows = [];
+      infoRows.forEach((row) => {
+        if(-1 != removalRows.indexOf(row))
+          dupRows.push(row);
+      });
+      console.log('dupRows', dupRows);
+
+      // 삭제하려고 하는 행이지만 병합된 셀이 포함되어 있지 않고 병합된 행보다 앞에 있는 행들을 구한다.
+      let notMerRows = [];
+      removalRows.forEach((row) => {
+        if(-1 == infoRows.indexOf(row))
+          notMerRows.push(row);
+      });
+      notMerRows.sort((a, b) => {
+        return a - b;
+      });
+      console.log('notMerRows', notMerRows);
+      if(notMerRows[0] < infoRows[0]){
+        for(let j = info.row - notMerRows.length; j < info.row + info.rowspan - notMerRows.length - dupRows.length; j++)
+          for(let i = info.col; i < info.col + info.colspan; i++){
+            willMergeCells.push(this.getCellByRowColumn(j, i));
+          }
+      }else {
+        for(let j = info.row; j < info.row + info.rowspan - dupRows.length; j++)
+          for(let i = info.col; i < info.col + info.colspan; i++){
+            willMergeCells.push(this.getCellByRowColumn(j, i));
+          }
+      }
+
+      this.mergeCells(willMergeCells);
+      if(willMergeCells.length > 1){
+        willMergeCells[0].set('text', info.text);
+      }
+    });
   }
 
   getCellByRowColumn(row, col){
@@ -587,11 +667,24 @@ export default class Table extends Container {
     // 2. 병합된 셀이 있으면 병합된 셀을 분할한다.
     // 3. 선택한 열을 지운다.
     // 4. 분할한 셀을 다시 병합한다.
+    // 선택한 열을 구한다.
+    let removalColumns = [];
 
-    // 선택한 열의 셀을 가져옴
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(-1 == removalColumns.indexOf(column))
+        removalColumns.push(column);
+    });
+    removalColumns.sort();
+
+    // 만약 removalColumns가 연속적인 숫자가 아니라면 리턴한다.
+    if ((removalColumns.length - 1) !== (removalColumns[removalColumns.length - 1] - removalColumns[0]))
+      return;
+
+    // 모든 셀을 가져오고 병합된 셀을 가져옴
     let cellsOfColumns = this.getColumnCellsAtSelCells(this.components);
+    // 모든 셀에서 병합된 셀을 가져옴
     let cellsMerged = this.getCellsMerged(cellsOfColumns);
-    // 지우려고 하는 열 중 병합된 열만 가져옴
     let columnsMerged = [];
     cellsOfColumns.forEach((cell) => {
       let column = this.getRowColumn(cell).column;
@@ -627,16 +720,6 @@ export default class Table extends Container {
       cell.superPos = -2;
       cell.superCell = false;
     });
-
-    // 선택한 열을 삭제한다.
-    let removalColumns = [];
-
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == removalColumns.indexOf(column))
-        removalColumns.push(column);
-    });
-    removalColumns.sort();
 
     let widths = this.widths.slice();
 
