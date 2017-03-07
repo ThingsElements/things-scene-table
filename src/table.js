@@ -777,6 +777,94 @@ export default class Table extends Container {
     });
   }
 
+  // 병합된 셀의 정보를 저장함
+  saveCellsMergedInfo(){
+    // 모든 셀에서 병합된 셀을 가져옴
+    let cellsMerged = this.getCellsMerged(this.components);
+    let columnsMerged = [];
+    this.components.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(cell.merged == true || cell.superCell == true)
+        if(-1 == columnsMerged.indexOf(column))
+          columnsMerged.push(column);
+    });
+    // 선택한 열에서 병합된 셀이 있다면
+    let parentCellsInfo = [];
+    if(cellsMerged.length > 0) {
+      // 부모 셀의 정보를 다음에 병합할 때 사용하기 위해 미리 저장한다.
+      let parentCells = this.findParentCells(cellsMerged);
+      parentCells.forEach((parentCell) => {
+        let objInfo = {};
+        objInfo.col = this.getRowColumn(parentCell).column;
+        objInfo.row = this.getRowColumn(parentCell).row;
+        objInfo.colspan = parentCell.colspan;
+        objInfo.rowspan = parentCell.rowspan;
+        objInfo.superPos = parentCell.superPos;
+        objInfo.text = parentCell.get('text');
+        parentCellsInfo.push(objInfo);
+      });
+    }
+    return parentCellsInfo;
+  }
+
+  // 모든 병합된 셀을 재배치함
+  reassignCellsMerged(parentCellsInfo, rows, cols){
+    // 모든 셀 분할
+    this.components.forEach((cell) => {
+      cell.colspan = 1;
+      cell.rowspan = 1;
+      cell.merged = false;
+      cell.superPos = -2;
+      cell.superCell = false;
+    });
+
+    // 다시 병합한다.
+    // parentCellsInfo.forEach((info) => {
+    //   let willMergeCells = [];
+    //   for(let j = info.row; j < info.row + info.rowspan; j++)
+    //     for(let i = info.col; i < info.col + info.colspan; i++){
+    //       willMergeCells.push(this.getCellByRowColumn(j, i));
+    //     }
+    //   this.mergeCells(willMergeCells);
+    // });
+
+    // 다시 병합한다.
+    if(rows !== 0){
+      parentCellsInfo.forEach((info) => {
+        let willMergeCells = [];
+        if(rows[0] <= info.row){
+          for(let j = info.row + rows.length; j < info.row + info.rowspan + rows.length; j++)
+            for(let i = info.col; i < info.col + info.colspan; i++){
+              willMergeCells.push(this.getCellByRowColumn(j, i));
+            }
+        }else{
+          for(let j = info.row; j < info.row + info.rowspan; j++)
+            for(let i = info.col; i < info.col + info.colspan; i++){
+              willMergeCells.push(this.getCellByRowColumn(j, i));
+            }
+        }
+        this.mergeCells(willMergeCells);
+      });
+    } else if(cols !== 0){
+      parentCellsInfo.forEach((info) => {
+        let willMergeCells = [];
+        if(cols[0] <= info.col){
+          for(let j = info.row; j < info.row + info.rowspan; j++)
+            for(let i = info.col + cols.length; i < info.col + info.colspan + cols.length; i++){
+              willMergeCells.push(this.getCellByRowColumn(j, i));
+            }
+        }else{
+          for(let j = info.row; j < info.row + info.rowspan; j++)
+            for(let i = info.col; i < info.col + info.colspan; i++){
+              willMergeCells.push(this.getCellByRowColumn(j, i));
+            }
+        }
+        this.mergeCells(willMergeCells);
+      });
+    }
+
+  }
+
   insertCellsAbove(cells) {
     var rows = []
 
@@ -793,11 +881,28 @@ export default class Table extends Container {
     var newbieRowHeights = []
     var newbieCells = []
 
+    // // 선택한 셀에 해당하는 행의 셀을 가져온다.
+    // let rowCells = this.getRowCellsAtSelCells(cells);
+    // let cellsMerged = this.getCellsMerged(rowCells);
+    //
+    // // 만약 선택한 셀에 해당하는 행에서 셀이 존재한다면 리턴한다.
+    // if(cellsMerged.length > 0)
+    //   return;
+
+    let parentCellsInfo = this.saveCellsMergedInfo();
+
+
     rows.forEach((row) => {
       for(let i = 0;i < this.columns;i++)
         newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
       newbieRowHeights.push(this.heights[row])
     })
+
+    // rows.forEach((row) => {
+    //   for(let i = 0;i < this.columns;i++)
+    //     newbieCells.push(buildNewCell(this.app))
+    //   newbieRowHeights.push(this.heights[row])
+    // })
 
     newbieCells.reverse().forEach((cell) => {
       this.insertComponentAt(cell, insertionRowPosition * this.columns);
@@ -808,6 +913,8 @@ export default class Table extends Container {
     this.set('heights', heights)
 
     this.model.rows += rows.length
+
+    this.reassignCellsMerged(parentCellsInfo, rows, 0);
 
     this.clearCache()
   }
@@ -829,6 +936,8 @@ export default class Table extends Container {
     var newbieRowHeights = []
     var newbieCells = []
 
+    let parentCellsInfo = this.saveCellsMergedInfo();
+
     rows.forEach((row) => {
       for(let i = 0;i < this.columns;i++)
         newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
@@ -844,6 +953,8 @@ export default class Table extends Container {
     this.set('heights', heights)
 
     this.model.rows += rows.length
+
+    this.reassignCellsMerged(parentCellsInfo, rows, 0);
 
     this.clearCache()
   }
@@ -864,6 +975,8 @@ export default class Table extends Container {
     var newbieColumnWidths = []
     var newbieCells = []
 
+    let parentCellsInfo = this.saveCellsMergedInfo();
+
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
         newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
@@ -888,6 +1001,8 @@ export default class Table extends Container {
     widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
 
     this.set('widths', widths)
+
+    this.reassignCellsMerged(parentCellsInfo, 0, columns);
   }
 
   insertCellsRight(cells) {
@@ -907,6 +1022,8 @@ export default class Table extends Container {
     var newbieColumnWidths = []
     var newbieCells = []
 
+    let parentCellsInfo = this.saveCellsMergedInfo();
+
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
         newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
@@ -930,6 +1047,8 @@ export default class Table extends Container {
 
     widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
     this.set('widths', widths)
+
+    this.reassignCellsMerged(parentCellsInfo, 0, columns);
   }
 
   mergeCells(cells) {
