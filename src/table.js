@@ -332,86 +332,110 @@ export default class Table extends Container {
 
       switch(where) {
       case 'all':
+        setCellBorder(cell, CLEAR_STYLE, 'all');
+
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left');
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
+
         setCellBorder(cell, style, 'left');
         setCellBorder(cell, style, 'top');
 
         if(isRightMost(total, columns, indices, i)) {
-          setCellBorder(components[after(columns, i)], style, 'left');
+          //setCellBorder(components[after(columns, i)], style, 'left');
+          setCellBorder(cell, style, 'right');
         }
         if(isBottomMost(total, columns, indices, i)) {
-          setCellBorder(components[below(columns, i)], style, 'top');
+          //setCellBorder(components[below(columns, i)], style, 'top');
+          setCellBorder(cell, style, 'bottom');
         }
         break;
       case 'in':
         if(!isLeftMost(total, columns, indices, i)) {
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
           setCellBorder(cell, style, 'left')
         }
-        if(!isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right')
-        }
         if(!isTopMost(total, columns, indices, i)) {
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
           setCellBorder(cell, style, 'top')
-        }
-        if(!isBottomMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'bottom')
         }
         break;
       case 'out':
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
+
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          setCellBorder(components[before(columns, i)], style, 'right')
+          //setCellBorder(components[before(columns, i)], style, 'right')
         }
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          setCellBorder(components[after(columns, i)], style, 'left')
+          //setCellBorder(components[after(columns, i)], style, 'left')
         }
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          setCellBorder(components[above(columns, i)], style, 'bottom')
+          //setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          setCellBorder(components[below(columns, i)], style, 'top')
+          //setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'left':
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          setCellBorder(components[before(columns, i)], style, 'right')
+          //setCellBorder(components[before(columns, i)], style, 'right')
         }
         break;
       case 'right':
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          setCellBorder(components[after(columns, i)], style, 'left')
+          //setCellBorder(components[after(columns, i)], style, 'left')
         }
         break;
       case 'center':
+        if(!isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(!isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
         }
-        if(!isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right')
-        }
         break;
       case 'middle':
+        if(!isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
         if(!isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
         }
-        if(!isBottomMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'bottom')
-        }
         break;
       case 'top':
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          setCellBorder(components[above(columns, i)], style, 'bottom')
+          // setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         break;
       case 'bottom':
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          setCellBorder(components[below(columns, i)], style, 'top')
+          //setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'clear':
