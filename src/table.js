@@ -328,21 +328,22 @@ export default class Table extends Container {
     var columns = this.get('columns');
     var indices = cells.map(cell => components.indexOf(cell));
 
+    console.log('indices', indices);
+
     indices.forEach(i => {
       var cell = components[i];
 
       switch(where) {
       case 'all':
-        setCellBorder(cell, style, where);
+        setCellBorder(cell, style, 'left');
+        setCellBorder(cell, style, 'top');
 
-        if(isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], style, 'right')
-        if(isRightMost(total, columns, indices, i))
-          setCellBorder(components[after(columns, i)], style, 'left')
-        if(isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], style, 'bottom')
-        if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], style, 'top')
+        if(isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right');
+        }
+        if(isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom');
+        }
         break;
       case 'in':
         if(!isLeftMost(total, columns, indices, i)) {
