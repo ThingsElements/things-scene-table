@@ -72,14 +72,6 @@ const EMPTY_BORDER = {}
     this.set('colspan', colspan)
   }
 
-  // set superCell(isSuper) {
-  //   this._superCell = isSuper;
-  // }
-  //
-  // get superCell() {
-  //   return this._superCell;
-  // }
-
   set superCell(superCell) {
     this.set('superCell', superCell);
   }

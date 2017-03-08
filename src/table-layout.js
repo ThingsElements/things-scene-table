@@ -53,7 +53,6 @@ var TableLayout = {
         x += w * width_unit
       }
     })
-
   },
 
   capturables: function(container) {

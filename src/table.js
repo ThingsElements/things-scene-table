@@ -272,7 +272,6 @@ export default class Table extends Container {
   }
 
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
-
     if(newrows < oldrows) {
       let removals = this._components.slice(oldcolumns * newrows);
       this.remove(removals);
@@ -328,8 +327,6 @@ export default class Table extends Container {
     var columns = this.get('columns');
     var indices = cells.map(cell => components.indexOf(cell));
 
-    console.log('indices', indices);
-
     indices.forEach(i => {
       var cell = components[i];
 
@@ -339,10 +336,10 @@ export default class Table extends Container {
         setCellBorder(cell, style, 'top');
 
         if(isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right');
+          setCellBorder(components[after(columns, i)], style, 'left');
         }
         if(isBottomMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'bottom');
+          setCellBorder(components[below(columns, i)], style, 'top');
         }
         break;
       case 'in':
@@ -437,7 +434,6 @@ export default class Table extends Container {
 
     if(!data)
       return
-
     data = this.toObjectArrayValue(data) || []
 
     var cells = this.components;
@@ -515,6 +511,7 @@ export default class Table extends Container {
     return cells;
   }
 
+  // 매개변수로 받은 셀 중에서 부모 셀을 반환
   findParentCells(cells){
     // 부모의 위치 별로 배열 생성
     var superCellIndexes = [];
@@ -756,7 +753,7 @@ export default class Table extends Container {
     return parentCellsInfo;
   }
 
-  // 모든 병합된 셀을 재배치함
+  // 모든 병합된 셀을 재배치함 , parentCellsInfo는 saveCellsMergedInfo의 리턴 값
   reassignCellsMerged(parentCellsInfo, rows, cols){
     // 모든 셀 분할
     this.components.forEach((cell) => {
@@ -804,7 +801,6 @@ export default class Table extends Container {
         this.mergeCells(willMergeCells);
       });
     }
-
   }
 
   insertCellsAbove(cells) {
