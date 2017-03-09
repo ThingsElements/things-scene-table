@@ -230,12 +230,10 @@ export default class Table extends Container {
     var widths = this.get('widths')
     var heights = this.get('heights')
 
-
     if(!widths || widths.length < this.columns)
       this.set('widths', this.widths)
     if(!heights || heights.length < this.rows)
       this.set('heights', this.heights)
-
   }
 
   // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
@@ -272,20 +270,10 @@ export default class Table extends Container {
   }
 
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
+
     if(newrows < oldrows) {
-      // let removals = this._components.slice(oldcolumns * newrows);
-      // this.remove(removals);
-      console.log('newrows', newrows);
-      console.log('newcolumns', newcolumns);
-      console.log('oldrows', oldrows);
-      console.log('oldcolumns', oldcolumns);
-      let removals = this._components.slice(newrows*newcolumns, oldrows*oldcolumns);
-      removals.forEach((remo)=>{
-        console.log(this.getRowColumn(remo));
-      })
-
-      this.deleteRows(removals);
-
+      let removals = this._components.slice(oldcolumns * newrows);
+      this.remove(removals);
     }
 
     var minrows = Math.min(newrows, oldrows)
@@ -343,110 +331,87 @@ export default class Table extends Container {
 
       switch(where) {
       case 'all':
-        setCellBorder(cell, CLEAR_STYLE, 'all');
+        setCellBorder(cell, style, where);
 
         if(isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
+          setCellBorder(components[before(columns, i)], style, 'right')
         if(isRightMost(total, columns, indices, i))
-          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left');
+          setCellBorder(components[after(columns, i)], style, 'left')
         if(isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
+          setCellBorder(components[above(columns, i)], style, 'bottom')
         if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
-
-        setCellBorder(cell, style, 'left');
-        setCellBorder(cell, style, 'top');
-
-        if(isRightMost(total, columns, indices, i)) {
-          //setCellBorder(components[after(columns, i)], style, 'left');
-          setCellBorder(cell, style, 'right');
-        }
-        if(isBottomMost(total, columns, indices, i)) {
-          //setCellBorder(components[below(columns, i)], style, 'top');
-          setCellBorder(cell, style, 'bottom');
-        }
+          setCellBorder(components[below(columns, i)], style, 'top')
         break;
       case 'in':
         if(!isLeftMost(total, columns, indices, i)) {
-          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
           setCellBorder(cell, style, 'left')
         }
+        if(!isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
+        }
         if(!isTopMost(total, columns, indices, i)) {
-          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
           setCellBorder(cell, style, 'top')
+        }
+        if(!isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
         }
         break;
       case 'out':
-        if(isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
-        if(isRightMost(total, columns, indices, i))
-          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
-        if(isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
-        if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
-
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          //setCellBorder(components[before(columns, i)], style, 'right')
+          setCellBorder(components[before(columns, i)], style, 'right')
         }
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          //setCellBorder(components[after(columns, i)], style, 'left')
+          setCellBorder(components[after(columns, i)], style, 'left')
         }
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          //setCellBorder(components[above(columns, i)], style, 'bottom')
+          setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          //setCellBorder(components[below(columns, i)], style, 'top')
+          setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'left':
-        if(isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          //setCellBorder(components[before(columns, i)], style, 'right')
+          setCellBorder(components[before(columns, i)], style, 'right')
         }
         break;
       case 'right':
-        if(isRightMost(total, columns, indices, i))
-          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          //setCellBorder(components[after(columns, i)], style, 'left')
+          setCellBorder(components[after(columns, i)], style, 'left')
         }
         break;
       case 'center':
-        if(!isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(!isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
         }
+        if(!isRightMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'right')
+        }
         break;
       case 'middle':
-        if(!isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
         if(!isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
         }
+        if(!isBottomMost(total, columns, indices, i)) {
+          setCellBorder(cell, style, 'bottom')
+        }
         break;
       case 'top':
-        if(isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          // setCellBorder(components[above(columns, i)], style, 'bottom')
+          setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         break;
       case 'bottom':
-        if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          //setCellBorder(components[below(columns, i)], style, 'top')
+          setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'clear':
@@ -469,6 +434,7 @@ export default class Table extends Container {
 
     if(!data)
       return
+
     data = this.toObjectArrayValue(data) || []
 
     var cells = this.components;
@@ -506,346 +472,42 @@ export default class Table extends Container {
     return cells
   }
 
-  // 선택한 셀에 해당하는 행의 셀을 가져오는 함수
-  getRowCellsAtSelCells(SelCells) {
-    var cells = [];
-    var rows = [];
-    SelCells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == rows.indexOf(row))
-        rows.push(row);
-    });
-
-    rows.sort();
-
-    rows.forEach((row) => {
-      let tempCells = this.getCellsByRow(row);
-      cells.push(...tempCells);
-    });
-
-    return cells;
-  }
-
-  // 선택한 셀에 해당하는 열의 셀을 가져오는 함수
-  getColumnCellsAtSelCells(SelCells) {
-    var cells = [];
-    var columns = [];
-    SelCells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == columns.indexOf(column))
-        columns.push(column);
-    });
-
-    columns.sort();
-
-    columns.forEach((column) => {
-      let tempCells = this.getCellsByColumn(column);
-      cells.push(...tempCells);
-    });
-
-    return cells;
-  }
-
-  // 매개변수로 받은 셀 중에서 부모 셀을 반환
-  findParentCells(cells){
-    // 부모의 위치 별로 배열 생성
-    var superCellIndexes = [];
-
-    cells.forEach((cell) => {
-      let superPos = cell.superPos;
-      if(-1 == superCellIndexes.indexOf(superPos) && cell.superPos != undefined && cell.superPos >= 0)
-        superCellIndexes.push(superPos);
-    });
-
-    superCellIndexes.sort((a, b) => {
-      return a - b;
-    });
-
-    // 부모 셀들을 생성
-    var superCells = [];
-
-    superCellIndexes.forEach((index) => {
-      superCells.push(this.components[index]);
-    });
-
-    return superCells;
-  }
-
-  // 셀들 중 병합된 셀이 있으면 병합된 셀들을 반환
-  getCellsMerged(cells){
-    let cellsMerged = [];
-    cells.forEach((cell) => {
-      if(cell.merged == true && cell.superCell != true)
-        cellsMerged.push(cell);
-      else if(cell.superCell == true)
-        cellsMerged.push(cell);
-    });
-    return cellsMerged;
-  }
-
   deleteRows(cells) {
-    // 선택한 행을 구한다.
-    let removalRows = [];
+    var removalRows = []
 
     cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
+      let row = this.getRowColumn(cell).row
       if(-1 == removalRows.indexOf(row))
-        removalRows.push(row);
-    });
-    removalRows.sort((a, b) => {
-      return a - b;
-    });
+        removalRows.push(row)
+    })
 
-    // 만약 removalRows가 연속적인 숫자가 아니라면 리턴한다.
-    if ((removalRows.length - 1) !== (removalRows[removalRows.length - 1] - removalRows[0]))
-      return;
-
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
-    // 모든 셀 분할
-    this.components.forEach((cell) => {
-      cell.colspan = 1;
-      cell.rowspan = 1;
-      cell.merged = false;
-      cell.superPos = -2;
-      cell.superCell = false;
-    });
-
-    let heights = this.heights.slice();
-
+    var heights = this.heights.slice()
     removalRows.reverse().forEach((row) => {
-      this.remove(this.getCellsByRow(row));
-      heights.splice(row, 1);
+      this.remove(this.getCellsByRow(row))
+      heights.splice(row, 1)
     })
 
     this.model.rows -= removalRows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    this.set('heights', heights);
-
-    // 다시 병합한다.
-    parentCellsInfo.forEach((info) => {
-      let willMergeCells = [];
-      let infoRows = [];
-      for(let i = info.row; i < info.row + info.rowspan; i++)
-        infoRows.push(i);
-      let dupRows = [];
-      infoRows.forEach((row) => {
-        if(-1 != removalRows.indexOf(row))
-          dupRows.push(row);
-      });
-
-      // 삭제하려고 하는 행이지만 병합된 셀이 포함되어 있지 않고 병합된 행보다 앞에 있는 행들을 구한다.
-      let notMerRows = [];
-      removalRows.forEach((row) => {
-        if(-1 == infoRows.indexOf(row))
-          notMerRows.push(row);
-      });
-      notMerRows.sort((a, b) => {
-        return a - b;
-      });
-      // 지우려고 하는 행이 병합된 행보다 앞에 있는 경우 병합된 행을 그 만큼 앞으로 이동시켜야 한다.
-      if(notMerRows[0] < infoRows[0]){
-        for(let j = info.row - notMerRows.length; j < info.row + info.rowspan - notMerRows.length - dupRows.length; j++)
-          for(let i = info.col; i < info.col + info.colspan; i++){
-            willMergeCells.push(this.getCellByRowColumn(j, i));
-          }
-      }
-      // 지우려고 하는 행이 병합된 행보다 뒤에 있는 경우 병합된 행을 이동하지 않아도 된다.
-      else {
-        for(let j = info.row; j < info.row + info.rowspan - dupRows.length; j++)
-          for(let i = info.col; i < info.col + info.colspan; i++){
-            willMergeCells.push(this.getCellByRowColumn(j, i));
-          }
-      }
-
-      this.mergeCells(willMergeCells);
-      if(willMergeCells.length > 1){
-        willMergeCells[0].set('text', info.text);
-      }
-    });
-  }
-
-  getCellByRowColumn(row, col){
-    return this.components[row * this.columns + col];
+    this.set('heights', heights)
   }
 
   deleteColumns(cells) {
-    // 1. 모든 셀에서 병합된 셀이 있는지 확인
-    // 2. 병합된 셀이 있으면 병합된 셀을 분할한다.
-    // 3. 선택한 열을 지운다.
-    // 4. 분할한 셀을 다시 병합한다.
-    // 선택한 열을 구한다.
-    let removalColumns = [];
+    var removalColumns = []
 
     cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
+      let column = this.getRowColumn(cell).column
       if(-1 == removalColumns.indexOf(column))
-        removalColumns.push(column);
-    });
-    removalColumns.sort((a, b) => {
-      return a - b;
-    });
+        removalColumns.push(column)
+    })
 
-    // 만약 removalColumns가 연속적인 숫자가 아니라면 리턴한다.
-    if ((removalColumns.length - 1) !== (removalColumns[removalColumns.length - 1] - removalColumns[0]))
-      return;
-
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
-    // 모든 셀 분할
-    this.components.forEach((cell) => {
-      cell.colspan = 1;
-      cell.rowspan = 1;
-      cell.merged = false;
-      cell.superPos = -2;
-      cell.superCell = false;
-    });
-
-    let widths = this.widths.slice();
-
-    let willRemoveCells = [];
+    var widths = this.widths.slice()
     removalColumns.reverse().forEach((column) => {
-      willRemoveCells.push(...this.getCellsByColumn(column));
-      widths.splice(column, 1);
-    });
-    // 셀을 한 번에 모아서 삭제한다(한 열씩 지우면 한 칸 씩 밀려서 버그 발생함)
-    this.remove(willRemoveCells);
+      this.remove(this.getCellsByColumn(column))
+      widths.splice(column, 1)
+    })
 
-    this.model.columns -= removalColumns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    this.set('widths', widths);
-
-    // 다시 병합한다.
-    parentCellsInfo.forEach((info) => {
-      let willMergeCells = [];
-      let infoColumns = [];
-      for(let i = info.col; i < info.col + info.colspan; i++)
-        infoColumns.push(i);
-      let dupColumns = [];
-      infoColumns.forEach((col) => {
-        if(-1 != removalColumns.indexOf(col))
-          dupColumns.push(col);
-      });
-
-      // 삭제하려고 하는 열이지만 병합된 셀이 포함되어 있지 않고 병합된 열보다 앞에 있는 열들을 구한다.
-      let notMerColumns = [];
-      removalColumns.forEach((col) => {
-        if(-1 == infoColumns.indexOf(col))
-          notMerColumns.push(col);
-      });
-      notMerColumns.sort((a, b) => {
-        return a - b;
-      });
-      // 지우려고 하는 열이 병합된 열보다 앞에 있는 경우 병합된 열을 그 만큼 앞으로 이동시켜야 한다.
-      if(notMerColumns[0] < infoColumns[0]){
-        for(let j = info.row; j < info.row + info.rowspan; j++)
-          for(let i = info.col - notMerColumns.length; i < info.col - notMerColumns.length + info.colspan - dupColumns.length; i++){
-            willMergeCells.push(this.getCellByRowColumn(j, i));
-          }
-      }
-      // 지우려고 하는 열이 병합된 열보다 뒤에 있는 경우 병합된 열을 이동하지 않아도 된다.
-      else {
-        for(let j = info.row; j < info.row + info.rowspan; j++)
-          for(let i = info.col; i < info.col + info.colspan - dupColumns.length; i++){
-            willMergeCells.push(this.getCellByRowColumn(j, i));
-          }
-      }
-
-      this.mergeCells(willMergeCells);
-      if(willMergeCells.length > 1){
-        willMergeCells[0].set('text', info.text);
-      }
-    });
-  }
-
-  // 병합된 셀의 정보를 저장함
-  saveCellsMergedInfo(){
-    // 모든 셀에서 병합된 셀을 가져옴
-    let cellsMerged = this.getCellsMerged(this.components);
-    let columnsMerged = [];
-    this.components.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(cell.merged == true || cell.superCell == true)
-        if(-1 == columnsMerged.indexOf(column))
-          columnsMerged.push(column);
-    });
-    // 선택한 열에서 병합된 셀이 있다면
-    let parentCellsInfo = [];
-    if(cellsMerged.length > 0) {
-      // 부모 셀의 정보를 다음에 병합할 때 사용하기 위해 미리 저장한다.
-      let parentCells = this.findParentCells(cellsMerged);
-      parentCells.forEach((parentCell) => {
-        let objInfo = {};
-        objInfo.col = this.getRowColumn(parentCell).column;
-        objInfo.row = this.getRowColumn(parentCell).row;
-        objInfo.colspan = parentCell.colspan;
-        objInfo.rowspan = parentCell.rowspan;
-        objInfo.superPos = parentCell.superPos;
-        objInfo.text = parentCell.get('text');
-        parentCellsInfo.push(objInfo);
-      });
-    }
-    return parentCellsInfo;
-  }
-
-  // 모든 병합된 셀을 재배치함 , parentCellsInfo는 saveCellsMergedInfo의 리턴 값
-  reassignCellsMerged(parentCellsInfo, rows, cols){
-    // 모든 셀 분할
-    this.components.forEach((cell) => {
-      cell.colspan = 1;
-      cell.rowspan = 1;
-      cell.merged = false;
-      cell.superPos = -2;
-      cell.superCell = false;
-    });
-
-    // 다시 병합한다.
-    // rows의 길이만큼 행의 위치를 이동하여 병합한다.
-    if(rows !== 0){
-      parentCellsInfo.forEach((info) => {
-        let willMergeCells = [];
-        if(rows[0] <= info.row){
-          for(let j = info.row + rows.length; j < info.row + info.rowspan + rows.length; j++)
-            for(let i = info.col; i < info.col + info.colspan; i++){
-              willMergeCells.push(this.getCellByRowColumn(j, i));
-            }
-        }else{
-          for(let j = info.row; j < info.row + info.rowspan; j++)
-            for(let i = info.col; i < info.col + info.colspan; i++){
-              willMergeCells.push(this.getCellByRowColumn(j, i));
-            }
-        }
-        this.mergeCells(willMergeCells);
-      });
-    }
-    // cols의 길이만큼 열의 위치를 이동하여 병합한다.
-    else if(cols !== 0){
-      parentCellsInfo.forEach((info) => {
-        let willMergeCells = [];
-        if(cols[0] <= info.col){
-          for(let j = info.row; j < info.row + info.rowspan; j++)
-            for(let i = info.col + cols.length; i < info.col + info.colspan + cols.length; i++){
-              willMergeCells.push(this.getCellByRowColumn(j, i));
-            }
-        }else{
-          for(let j = info.row; j < info.row + info.rowspan; j++)
-            for(let i = info.col; i < info.col + info.colspan; i++){
-              willMergeCells.push(this.getCellByRowColumn(j, i));
-            }
-        }
-        this.mergeCells(willMergeCells);
-      });
-    }
-    else if(rows === 0 && cols === 0){
-      parentCellsInfo.forEach((info) => {
-        let willMergeCells = [];
-        for(let j = info.row; j < info.row + info.rowspan; j++)
-          for(let i = info.col; i < info.col + info.colspan; i++){
-            willMergeCells.push(this.getCellByRowColumn(j, i));
-          }
-        this.mergeCells(willMergeCells , false);
-      });
-    }
+    this.model.columns -= removalColumns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('widths', widths)
   }
 
   insertCellsAbove(cells) {
@@ -864,10 +526,6 @@ export default class Table extends Container {
     var newbieRowHeights = []
     var newbieCells = []
 
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
-
     rows.forEach((row) => {
       for(let i = 0;i < this.columns;i++)
         newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
@@ -883,8 +541,6 @@ export default class Table extends Container {
     this.set('heights', heights)
 
     this.model.rows += rows.length
-
-    this.reassignCellsMerged(parentCellsInfo, rows, 0);
 
     this.clearCache()
   }
@@ -906,9 +562,6 @@ export default class Table extends Container {
     var newbieRowHeights = []
     var newbieCells = []
 
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
     rows.forEach((row) => {
       for(let i = 0;i < this.columns;i++)
         newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
@@ -924,8 +577,6 @@ export default class Table extends Container {
     this.set('heights', heights)
 
     this.model.rows += rows.length
-
-    this.reassignCellsMerged(parentCellsInfo, rows, 0);
 
     this.clearCache()
   }
@@ -946,9 +597,6 @@ export default class Table extends Container {
     var newbieColumnWidths = []
     var newbieCells = []
 
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
         newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
@@ -973,8 +621,6 @@ export default class Table extends Container {
     widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
 
     this.set('widths', widths)
-
-    this.reassignCellsMerged(parentCellsInfo, 0, columns);
   }
 
   insertCellsRight(cells) {
@@ -994,9 +640,6 @@ export default class Table extends Container {
     var newbieColumnWidths = []
     var newbieCells = []
 
-    // 모든 셀에서 병합된 부모 셀의 정보를 가져온다.
-    let parentCellsInfo = this.saveCellsMergedInfo();
-
     columns.forEach((column) => {
       for(let i = 0;i < this.rows;i++)
         newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
@@ -1020,104 +663,6 @@ export default class Table extends Container {
 
     widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
     this.set('widths', widths)
-
-    this.reassignCellsMerged(parentCellsInfo, 0, columns);
-  }
-
-  mergeCells(cells, selected) {
-    // 이미 병합된 상태라면 병합하지 않는다.
-    for(let i = 0; i < cells.length; i++){
-      if(cells[i].merged == true || cells[i].superCell == true)
-        return false;
-    }
-
-    // 선택한 셀에 들어있는 행
-    var mergeableRows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == mergeableRows.indexOf(row))
-        mergeableRows.push(row);
-    });
-
-    // 병합할 행의 수
-    var numberOfRows = mergeableRows.length;
-
-    // 선택한 셀에 들어있는 열
-    var mergeableColumns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == mergeableColumns.indexOf(column))
-        mergeableColumns.push(column);
-    });
-
-    // 병합할 열의 수
-    var numberOfColumns = mergeableColumns.length;
-
-    // 선택된 셀의 개수
-    var numberOfCells = cells.length;
-
-    // 병합될 조건 검사
-    // 행과 열의 곱이 셀의 수가 아니거나 셀의 수가 2보다 작은 경우는 병합하지 않는다.
-    if(numberOfCells !== numberOfRows * numberOfColumns || numberOfCells < 2)
-      return false;
-
-    // 선택한 셀들을 index 값이 낮은 것부터 순서대로 재정렬
-    cells.sort((a, b) => {
-      return ((this.getRowColumn(a).row * this.columns) + this.getRowColumn(a).column) - ((this.getRowColumn(b).row * this.columns) + this.getRowColumn(b).column);
-    });
-
-    // 셀을 병합함
-    var firstCell = cells[0];
-    firstCell.colspan = numberOfColumns;
-    firstCell.rowspan = numberOfRows;
-
-    // 병합된 셀 중에서 부모는 superCell = true로 지정한다.
-    firstCell.superCell = true;
-
-    // 부모셀 자기 자신의 위치
-    firstCell.superPos = (this.getRowColumn(cells[0]).row * this.columns) + this.getRowColumn(cells[0]).column;
-
-    for(let i = 1; i < numberOfCells; i++){
-      cells[i].merged = true;
-      // 자식 셀이 부모 셀의 위치를 갖고 있다.
-      cells[i].superPos = (this.getRowColumn(cells[0]).row * this.columns) + this.getRowColumn(cells[0]).column;
-    }
-    if(selected !== false){
-      this.root.selected = [firstCell];
-    }
-  }
-
-  splitCells(cells) {
-    // 병합된 셀들을 구하기 위해 필요한 값을 가져온다.
-    var firstCellRowColumn = this.getRowColumn(cells[0]);
-    var firstCell = cells[0];
-    var firstCellIndex = this.components.indexOf(cells[0]);
-    var length = this.components.length;
-    var lastCell = this.components[length-1];
-    var lastCellRowColumn = this.getRowColumn(lastCell);
-    var startIndex = length / (lastCellRowColumn.row + 1);
-
-    // 병합된 셀들을 구해서 merged를 false로 설정한다.
-    // 자식 셀이 갖고 있는 부모 셀의 위치를 초기화 한다.
-    for(let j = 0; j < firstCell.rowspan; j++){
-      let index;
-      let nextCell;
-      for(let i = firstCellIndex; i < firstCellIndex + firstCell.colspan; i++){
-        index = startIndex * j + i;
-        nextCell = this.components[index];
-        nextCell.merged = false;
-        nextCell.superPos = -2;
-      }
-    }
-
-    // 첫 번째 셀의 rowspan, colspan = 1로 지정한다.
-    firstCell.colspan = 1;
-    firstCell.rowspan = 1;
-
-    // 병합된 셀 중에서 부모를 superCell = false로 지정한다.
-    firstCell.superCell = false;
-    firstCell.superPos = -2;
-
   }
 
   distributeHorizontal(cells) {
@@ -1283,20 +828,18 @@ export default class Table extends Container {
   }
 
   onchange(after, before) {
-    //console.log('event', after)
     if(hasAnyProperty(after, "rows", "columns")) {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
-        before.hasOwnProperty('rows') ? before.rows : this.get('rows'),
-        before.hasOwnProperty('columns') ? before.columns : this.get('columns')
+        before.rows === undefined ? this.get('rows') : before.rows,
+        before.columns === undefined ? this.get('columns') : before.columns
       )
     }
 
     if(before.data || after.data) {
       this.setCellsData()
     }
-
   }
 
   get eventMap() {
