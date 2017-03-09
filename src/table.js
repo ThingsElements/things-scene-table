@@ -472,23 +472,146 @@ export default class Table extends Container {
     return cells
   }
 
-  deleteRows(cells) {
-    var removalRows = []
+  // 한 개의 행을 매개변수로 받아서 첫 번째 셀부터 우측으로 이동면서 병합된 셀이 있는지 검사한다.
+  findMergedCellByX(row) {
+    let mergedCells = [];
+    let cell;
+    for(let i = 0; i < this.columns; i++){
+      cell = this.components[row * this.columns + i];
+      if(cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
+        mergedCells.push(cell);
+    }
+    return mergedCells;
+  }
 
+  // 병합된 셀을 찾은 후 좌측 방향으로 rowspan이나 colspan이 1보다 큰 값을 찾는다.
+  findSuperCell() {
+
+  }
+
+  mergeCells(cells) {
+    // 선택한 셀이 들어있는 행
+    let mergeableRows = [];
     cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row
-      if(-1 == removalRows.indexOf(row))
-        removalRows.push(row)
-    })
+      let row = this.getRowColumn(cell).row;
+      if(-1 == mergeableRows.indexOf(row))
+        mergeableRows.push(row);
+    });
 
-    var heights = this.heights.slice()
-    removalRows.reverse().forEach((row) => {
-      this.remove(this.getCellsByRow(row))
-      heights.splice(row, 1)
-    })
+    // 선택한 셀이 들어있는 열
+    let mergeableColumns = [];
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(-1 == mergeableColumns.indexOf(column))
+        mergeableColumns.push(column);
+    });
 
-    this.model.rows -= removalRows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    this.set('heights', heights)
+    // 병합할 행의 수
+    let numberOfRows = mergeableRows.length;
+
+    // 병합할 열의 수
+    let numberOfColumns = mergeableColumns.length;
+
+    // 선택된 셀의 수
+    let numberOfCells = cells.length;
+
+    // 병합될 조건 검사
+    // 행과 열의 곱이 셀의 수가 아니거나 셀의 수가 2보다 작은 경우는 병합하지 않는다.
+    if(numberOfCells !== numberOfRows * numberOfColumns || numberOfCells < 2)
+      return false;
+
+    // 선택한 셀들을 index 값이 낮은 것부터 순서대로 재정렬
+    cells.sort((a, b) => {
+      return ((this.getRowColumn(a).row * this.columns) + this.getRowColumn(a).column) - ((this.getRowColumn(b).row * this.columns) + this.getRowColumn(b).column);
+    });
+
+    // 셀을 병합함
+    let firstCell = cells[0];
+    firstCell.set({
+      colspan: numberOfColumns,
+      rowspan: numberOfRows
+    });
+
+    // 첫 번째 셀을 제외한 나머지 셀을 true로 지정
+    for(let i = 1; i < numberOfCells; i++)
+      cells[i].merged = true;
+
+    // 병합 후에는 첫 번째 셀을 선택하도록 함
+    this.root.selected = [firstCell];
+  }
+
+  deleteRows(cells) {
+    // 먼저 cells 위치의 행을 구한다.
+    let rows = [];
+    cells.forEach((cell) => {
+      let row = this.getRowColumn(cell).row;
+      if(-1 == rows.indexOf(row))
+        rows.push(row);
+    });
+    rows.sort((a, b) => {
+      return a - b;
+    });
+    rows.reverse();
+    var heights = this.heights.slice();
+    rows.forEach((row) => {
+      // rows에서 가로 방향으로 이동하면서 병합된 셀을 찾는다.
+      let mergedCells = this.findMergedCellByX(row);
+      // mergedCells.length가 0이면 일반적으로 행을 지운다.
+      if(mergedCells.length === 0) {
+        this.remove(this.getCellsByRow(row));
+      }
+      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 지워야 한다.
+      //
+      else {
+        // 삭제할 행에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
+        let temp = [];
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스 값을 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.getRowColumn(cell).column;
+          row = this.getRowColumn(cell).row;
+          index = row * this.columns + col + 1;
+          while(index){
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.getRowColumn(component).column;
+              let spColEnd = this.getRowColumn(component).column + component.colspan;
+              let spRowStart = this.getRowColumn(component).row;
+              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        superCellIndexes.forEach((index) => {
+          let superCellRow = Math.floor(index/this.columns);
+          // 지우려는 행이 슈퍼셀을 포함한 경우
+          if(row === superCellRow){
+            this.components[index + this.columns].rowspan = this.components[index].rowspan - 1;
+            this.components[index + this.columns].colspan = this.components[index].colspan;
+            this.components[index + this.columns].merged = false;
+            this.components[index + this.columns].set('text', this.components[index].get('text'));
+          } else {
+            this.components[index].rowspan -= 1;
+          }
+        });
+      this.remove(this.getCellsByRow(row));
+      }
+    })
+    heights.splice(rows, 1);
+    this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('heights', heights);
+
   }
 
   deleteColumns(cells) {
@@ -501,10 +624,14 @@ export default class Table extends Container {
     })
 
     var widths = this.widths.slice()
+
+    let willRemoveCells = [];
     removalColumns.reverse().forEach((column) => {
-      this.remove(this.getCellsByColumn(column))
+      willRemoveCells.push(...this.getCellsByColumn(column));
       widths.splice(column, 1)
     })
+    // deleteColumns의 경우 셀을 한 번에 모아서 삭제한다.(한 열씩 지우면 한 칸씩 밀려서 버그 발생함)
+    this.remove(willRemoveCells);
 
     this.model.columns -= removalColumns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
     this.set('widths', widths)
@@ -832,8 +959,8 @@ export default class Table extends Container {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
-        before.rows === undefined ? this.get('rows') : before.rows,
-        before.columns === undefined ? this.get('columns') : before.columns
+        before.hasOwnProperty('rows') ? before.rows : this.get('rows'),
+        before.hasOwnProperty('columns') ? before.columns : this.get('columns')
       )
     }
 

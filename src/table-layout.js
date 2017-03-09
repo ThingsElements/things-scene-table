@@ -22,16 +22,27 @@ var TableLayout = {
 
     var x = 0;
     var y = 0;
+    var components = container.components;
 
-    container.components.forEach((component, idx) =>{
+    components.forEach((component, idx) => {
       let w = widths ? widths[idx % columns] : 1
       let h = heights ? heights[Math.floor(idx / columns)] : 1
+
+      let colspan = component.colspan || 1
+      let wspan = 0
+      while(--colspan > 0)
+        wspan += widths ? widths[(idx + colspan) % columns] : 1
+
+      let rowspan = component.rowspan || 1
+      let hspan = 0
+      while(--rowspan > 0)
+        hspan += heights ? heights[Math.floor(idx / columns) + rowspan] : 1
 
       component.bounds = {
         left : paddingLeft + x,
         top : paddingTop + y,
-        width : width_unit * w,
-        height : height_unit * h
+        width : width_unit * (w + wspan),
+        height : height_unit * (h + hspan)
       }
       component.set('rotation', 0)
 
@@ -46,11 +57,11 @@ var TableLayout = {
   },
 
   capturables: function(container) {
-    return container.components
+    return container.components.filter((cell) => { return !cell.merged })
   },
 
   drawables: function(container) {
-    return container.components
+    return container.components.filter((cell) => { return !cell.merged })
   },
 
   isStuck: function(component) {
