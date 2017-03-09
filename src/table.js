@@ -273,8 +273,19 @@ export default class Table extends Container {
 
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
     if(newrows < oldrows) {
-      let removals = this._components.slice(oldcolumns * newrows);
-      this.remove(removals);
+      // let removals = this._components.slice(oldcolumns * newrows);
+      // this.remove(removals);
+      console.log('newrows', newrows);
+      console.log('newcolumns', newcolumns);
+      console.log('oldrows', oldrows);
+      console.log('oldcolumns', oldcolumns);
+      let removals = this._components.slice(newrows*newcolumns, oldrows*oldcolumns);
+      removals.forEach((remo)=>{
+        console.log(this.getRowColumn(remo));
+      })
+
+      this.deleteRows(removals);
+
     }
 
     var minrows = Math.min(newrows, oldrows)
@@ -825,6 +836,16 @@ export default class Table extends Container {
         this.mergeCells(willMergeCells);
       });
     }
+    else if(rows === 0 && cols === 0){
+      parentCellsInfo.forEach((info) => {
+        let willMergeCells = [];
+        for(let j = info.row; j < info.row + info.rowspan; j++)
+          for(let i = info.col; i < info.col + info.colspan; i++){
+            willMergeCells.push(this.getCellByRowColumn(j, i));
+          }
+        this.mergeCells(willMergeCells , false);
+      });
+    }
   }
 
   insertCellsAbove(cells) {
@@ -1003,7 +1024,7 @@ export default class Table extends Container {
     this.reassignCellsMerged(parentCellsInfo, 0, columns);
   }
 
-  mergeCells(cells) {
+  mergeCells(cells, selected) {
     // 이미 병합된 상태라면 병합하지 않는다.
     for(let i = 0; i < cells.length; i++){
       if(cells[i].merged == true || cells[i].superCell == true)
@@ -1061,8 +1082,9 @@ export default class Table extends Container {
       // 자식 셀이 부모 셀의 위치를 갖고 있다.
       cells[i].superPos = (this.getRowColumn(cells[0]).row * this.columns) + this.getRowColumn(cells[0]).column;
     }
-
-    this.root.selected = [firstCell];
+    if(selected !== false){
+      this.root.selected = [firstCell];
+    }
   }
 
   splitCells(cells) {
@@ -1261,19 +1283,20 @@ export default class Table extends Container {
   }
 
   onchange(after, before) {
-    console.log('event', after)
+    //console.log('event', after)
     if(hasAnyProperty(after, "rows", "columns")) {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
-        before.rows === undefined ? this.get('rows') : before.rows,
-        before.columns === undefined ? this.get('columns') : before.columns
+        before.hasOwnProperty('rows') ? before.rows : this.get('rows'),
+        before.hasOwnProperty('columns') ? before.columns : this.get('columns')
       )
     }
 
     if(before.data || after.data) {
       this.setCellsData()
     }
+
   }
 
   get eventMap() {

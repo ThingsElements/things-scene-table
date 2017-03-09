@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
 
     <link rel="import" href="../../things-designer-elements/things-editor-properties.html">
+    <link rel="import" href="../../things-scene-modeler/things-scene-properties.html">
 
     <link rel="import" href="./things-scene-table.html">
 
@@ -51,7 +52,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <things-editor-properties id='props' target="{{selected.0.model}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
 
-    </template>
+      <things-scene-properties scene="[[scene]]"
+                               selected="[[selected]]"
+                               model="{{target}}"
+                               bounds="{{bounds}}">
+        <fieldset>
+          <legend>table properties</legend>
+          <label>rows</label>
+            <input is="things-editor-number-input" number="{{target.rows::change}}"/>
+            <label>columns</label>
+            <input is="things-editor-number-input" number="{{target.columns::change}}"/>
+            <label>top</label>
+            <input is="things-editor-number-input" number="{{target.paddingTop::change}}"/>
+            <label>left</label>
+            <input is="things-editor-number-input" number="{{target.paddingLeft::change}}"/>
+            <label>right</label>
+            <input is="things-editor-number-input" number="{{target.paddingRight::change}}"/>
+            <label>bottom</label>
+            <input is="things-editor-number-input" number="{{target.paddingBottom::change}}"/>
+          </fieldset>
+        </things-scene-properties>
+
+      </template>
 
     <script>
     window.addEventListener('WebComponentsReady', function(e) {
@@ -195,7 +217,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             ['header1', 'header2', 'header3', 'header1', 'header2', 'header3', 'header1', 'header2', 'header3'],
             [100, 200, 300, 100, 200, 300, 100, 200, 300],
             [1000, 2000, 3000]
-          ]
+          ],
+          components: [{
+            type: 'table-cell',
+            colspan: 2,
+            text: 'aaaaa',
+            width: 1,
+            height: 1
+          }, {
+            type: 'table-cell',
+            merged: true,
+            width: 1,
+            height: 1
+          }]
         }]
       }
     });
