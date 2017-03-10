@@ -595,8 +595,8 @@ export default class Table extends Container {
         });
         superCellIndexes.forEach((index) => {
           let superCellRow = Math.floor(index/this.columns);
-          // 지우려는 행이 슈퍼셀을 포함한 경우
-          if(row === superCellRow){
+          // 지우려는 행이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 행의 셀이 아닌 경우
+          if(row === superCellRow && superCellRow !== this.rows - 1){
             this.components[index + this.columns].rowspan = this.components[index].rowspan - 1;
             this.components[index + this.columns].colspan = this.components[index].colspan;
             this.components[index + this.columns].merged = false;
