@@ -472,12 +472,24 @@ export default class Table extends Container {
     return cells
   }
 
-  // 한 개의 행을 매개변수로 받아서 첫 번째 셀부터 우측으로 이동면서 병합된 셀이 있는지 검사한다.
+  // 한 개의 행을 매개변수로 받아서 첫 번째 셀부터 우측으로 이동하면서 병합된 셀이 있는지 검사한다.
   findMergedCellByX(row) {
     let mergedCells = [];
     let cell;
     for(let i = 0; i < this.columns; i++){
       cell = this.components[row * this.columns + i];
+      if(cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
+        mergedCells.push(cell);
+    }
+    return mergedCells;
+  }
+
+  // 한 개의 열을 매개변수로 받아서 첫 번째 셀부터 아래로 이동하면서 병합된 셀이 있는지 검사한다.
+  findMergedCellByY(column) {
+    let mergedCells = [];
+    let cell;
+    for(let i = 0; i < this.rows; i++){
+      cell = this.components[i * this.columns + column];
       if(cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
         mergedCells.push(cell);
     }
@@ -577,7 +589,7 @@ export default class Table extends Container {
           while(index){
             --index;
             let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면 cell이 있는지 검증해야함
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
             if(component.rowspan > 1 || component.colspan > 1){
               let spColStart = this.getRowColumn(component).column;
               let spColEnd = this.getRowColumn(component).column + component.colspan;
@@ -607,34 +619,83 @@ export default class Table extends Container {
         });
       this.remove(this.getCellsByRow(row));
       }
-    })
+    });
     heights.splice(rows, 1);
     this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
     this.set('heights', heights);
-
   }
 
   deleteColumns(cells) {
-    var removalColumns = []
-
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
     cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column
-      if(-1 == removalColumns.indexOf(column))
-        removalColumns.push(column)
-    })
+      let column = this.getRowColumn(cell).column;
+      if(-1 == columns.indexOf(column))
+        columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
 
-    var widths = this.widths.slice()
-
-    let willRemoveCells = [];
-    removalColumns.reverse().forEach((column) => {
-      willRemoveCells.push(...this.getCellsByColumn(column));
-      widths.splice(column, 1)
-    })
-    // deleteColumns의 경우 셀을 한 번에 모아서 삭제한다.(한 열씩 지우면 한 칸씩 밀려서 버그 발생함)
-    this.remove(willRemoveCells);
-
-    this.model.columns -= removalColumns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    this.set('widths', widths)
+    columns.forEach((column) => {
+      var widths = this.widths.slice();
+      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
+      let mergedCells = this.findMergedCellByY(column);
+      // mergedCells.length가 0이면 일반적으로 열을 지운다.
+      if(mergedCells.length === 0) {
+        this.remove(this.getCellsByColumn(column));
+      }
+      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 지워야 한다.
+      else {
+        // 삭제할 열에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
+        let temp = [];
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스를 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.getRowColumn(cell).column;
+          row = this.getRowColumn(cell).row;
+          index = row * this.columns + col + 1;
+          while(index){
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.getRowColumn(component).column;
+              let spColEnd = this.getRowColumn(component).column + component.colspan;
+              let spRowStart = this.getRowColumn(component).row;
+              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        superCellIndexes.forEach((index) => {
+          let superCellColumn = index % this.columns;
+          // 지우려는 열이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 열의 셀이 아닌 경우
+          if(column === superCellColumn && superCellColumn !== this.columns -1){
+            this.components[index + 1].rowspan = this.components[index].rowspan;
+            this.components[index + 1].colspan = this.components[index].colspan - 1;
+            this.components[index + 1].merged = false;
+            this.components[index + 1].set('text', this.components[index].get('text'));
+          } else {
+            this.components[index].colspan -= 1;
+          }
+        });
+      this.remove(this.getCellsByColumn(column));
+      }
+      widths.splice(column, 1);
+      this.model.columns -= 1; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      this.set('widths', widths);
+    });
   }
 
   insertCellsAbove(cells) {
