@@ -510,6 +510,10 @@ export default class Table extends Container {
         mergeableRows.push(row);
     });
 
+    // 선택한 셀의 행이 연속적인 숫자가 아니라면 병합하지 않는다.
+    if(mergeableRows.length - 1 !== (mergeableRows[mergeableRows.length - 1] - mergeableRows[0]))
+     return false;
+
     // 선택한 셀이 들어있는 열
     let mergeableColumns = [];
     cells.forEach((cell) => {
@@ -517,6 +521,10 @@ export default class Table extends Container {
       if(-1 == mergeableColumns.indexOf(column))
         mergeableColumns.push(column);
     });
+
+    // 선택한 셀의 열이 연속적인 숫자가 아니라면 병합하지 않는다.
+    if(mergeableColumns.length - 1 !== (mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0]))
+     return false;
 
     // 병합할 행의 수
     let numberOfRows = mergeableRows.length;
