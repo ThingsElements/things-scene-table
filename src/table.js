@@ -736,9 +736,6 @@ export default class Table extends Container {
   }
 
   insertCellsAbove(cells) {
-    // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if(cells.length >= 2)
-      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -750,6 +747,9 @@ export default class Table extends Container {
       return a - b;
     });
     rows.reverse();
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(rows.length >= 2)
+      return false;
     let insertionRowPosition = rows[0];
     let newbieRowHeights = [];
     let newbieCells = [];
@@ -803,6 +803,9 @@ export default class Table extends Container {
           }
         });
         superCellIndexes.forEach((index) => {
+          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
+          if(superCellIndexes.length >= 2)
+            return false;
           let superCellRow = Math.floor(index/this.columns);
           let superCellObj = {
             rowspan : this.components[index].rowspan,
@@ -823,7 +826,8 @@ export default class Table extends Container {
             this.components[index + this.columns].colspan = superCellObj.colspan;
             this.components[index + this.columns].set('text', superCellObj.text);
             this.components[index + this.columns].merged = superCellObj.merged;
-          } else {
+          }
+          else {
             for(let i = 0;i < this.columns;i++)
               newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
             newbieRowHeights.push(this.heights[row]);
@@ -833,22 +837,19 @@ export default class Table extends Container {
             });
             this.components[index].rowspan += 1;
           }
+          let heights = this.heights.slice();
+          heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+          this.set('heights', heights);
+
+          this.model.rows += rows.length;
+
+          this.clearCache();
         });
       }
     });
-    let heights = this.heights.slice();
-    heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-    this.set('heights', heights);
-
-    this.model.rows += rows.length;
-
-    this.clearCache();
   }
 
   insertCellsBelow(cells) {
-    // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if(cells.length >= 2)
-      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -860,6 +861,9 @@ export default class Table extends Container {
       return a - b;
     });
     rows.reverse();
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(rows.length >= 2)
+      return false;
     let insertionRowPosition = rows[rows.length - 1] + 1;
     let newbieRowHeights = [];
     let newbieCells = [];
@@ -909,6 +913,9 @@ export default class Table extends Container {
           }
         });
         superCellIndexes.forEach((index) => {
+          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
+          if(superCellIndexes.length >= 2)
+            return false;
           let superCellRow = Math.floor(index/this.columns);
           let superCellObj = {
             rowspan : this.components[index].rowspan,
@@ -925,16 +932,23 @@ export default class Table extends Container {
             newbieCells.reverse().forEach((cell) => {
               this.insertComponentAt(cell, insertionRowPosition * this.columns);
             });
-          } else if(superCellRow === row) {
+          }
+          else if(superCellRow === row) {
             for(let i = 0;i < this.columns;i++)
-              newbieCells.push(buildCopiedCell(this.components[(row + 1) * this.columns + i].model, this.app));
+              newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
             newbieRowHeights.push(this.heights[row]);
 
             newbieCells.reverse().forEach((cell) => {
               this.insertComponentAt(cell, insertionRowPosition * this.columns);
             });
             this.components[index].rowspan += 1;
-          } else {
+            // 슈퍼셀이 복사됐으므로 그 해당 셀을 병합된 셀로 설정한다.
+            this.components[index + this.columns].rowspan = 1;
+            this.components[index + this.columns].colspan = 1;
+            this.components[index + this.columns].merged = true;
+            this.components[index + this.columns].set('text', '');
+          }
+          else {
             for(let i = 0;i < this.columns;i++)
               newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
             newbieRowHeights.push(this.heights[row]);
@@ -944,23 +958,19 @@ export default class Table extends Container {
             });
             this.components[index].rowspan += 1;
           }
+          let heights = this.heights.slice();
+          heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+          this.set('heights', heights);
+
+          this.model.rows += 1;
+
+          this.clearCache();
         });
       }
     });
-
-    let heights = this.heights.slice();
-    heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-    this.set('heights', heights);
-
-    this.model.rows += 1;
-
-    this.clearCache();
   }
 
   insertCellsLeft(cells) {
-    // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if(cells.length >= 2)
-      return false;
     // 먼저 cells 위치의 열을 구한다.
     let columns = [];
     cells.forEach((cell) => {
@@ -972,6 +982,9 @@ export default class Table extends Container {
       return a - b;
     });
     columns.reverse();
+    // 열 2개 이상은 추가 안함. 임시로 막아놓음
+    if(columns.length >= 2)
+      return false;
     let insertionColumnPosition = columns[0];
     let newbieColumnWidths = [];
     let newbieCells = [];
@@ -1027,6 +1040,9 @@ export default class Table extends Container {
           }
         });
         superCellIndexes.forEach((index) => {
+          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
+          if(superCellIndexes.length >= 2)
+            return false;
           let superCellColumn = index % this.columns;
           let superCellObj = {
             rowspan : this.components[index].rowspan,
@@ -1051,7 +1067,8 @@ export default class Table extends Container {
               rowIndex--;
               this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
             });
-          } else {
+          }
+          else {
             this.components[index].colspan += 1;
             for(let i = 0; i < this.rows; i++)
               newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
@@ -1069,21 +1086,18 @@ export default class Table extends Container {
               this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
             });
           }
+          let widths = this.widths.slice();
+          this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+          widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+          this.set('widths', widths);
         });
       }
     });
-    let widths = this.widths.slice();
-    this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
-
-    this.set('widths', widths);
   }
 
   insertCellsRight(cells) {
-    // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if(cells.length >= 2)
-      return false;
     // 먼저 cells 위치의 열을 구한다.
     let columns = [];
     cells.forEach((cell) => {
@@ -1095,6 +1109,9 @@ export default class Table extends Container {
       return a - b;
     });
     columns.reverse();
+    // 열 2개 이상은 추가 안함. 임시로 막아놓음
+    if(columns.length >= 2)
+      return false;
     let insertionColumnPosition = columns[columns.length - 1] + 1;
     let newbieColumnWidths = [];
     let newbieCells = [];
@@ -1150,6 +1167,10 @@ export default class Table extends Container {
           }
         });
         superCellIndexes.forEach((index) => {
+          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
+          if(superCellIndexes.length >= 2)
+            return false;
+          let superCellRow = Math.floor(index/this.columns);
           let superCellColumn = index % this.columns;
           let superCellObj = {
             rowspan : this.components[index].rowspan,
@@ -1174,10 +1195,11 @@ export default class Table extends Container {
               rowIndex--;
               this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
             });
-          } else if(superCellColumn === column) {
+          }
+          else if(superCellColumn === column) {
             this.components[index].colspan += 1;
             for(let i = 0; i < this.rows; i++)
-              newbieCells.push(buildCopiedCell(this.components[(column + 1) + this.columns * i].model, this.app));
+              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
             newbieColumnWidths.push(this.widths[column]);
 
             let increasedColumns = this.columns;
@@ -1191,7 +1213,13 @@ export default class Table extends Container {
               rowIndex--;
               this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
             });
-          } else {
+            // 슈퍼셀이 복사됐으므로 그 해당 셀을 병합된 셀로 설정한다.
+            this.components[index + superCellRow + 1].rowspan = 1;
+            this.components[index + superCellRow + 1].colspan = 1;
+            this.components[index + superCellRow + 1].merged = true;
+            this.components[index + superCellRow + 1].set('text', '');
+          }
+          else {
             this.components[index].colspan += 1;
             for(let i = 0; i < this.rows; i++)
               newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
@@ -1209,15 +1237,16 @@ export default class Table extends Container {
               this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
             });
           }
+          let widths = this.widths.slice();
+          this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+          widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+          this.set('widths', widths);
         });
       }
     });
-    let widths = this.widths.slice();
-    this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
-
-    this.set('widths', widths);
     // var columns = []
     //
     // cells.forEach((cell) => {
