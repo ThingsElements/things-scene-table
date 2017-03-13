@@ -736,6 +736,9 @@ export default class Table extends Container {
   }
 
   insertCellsAbove(cells) {
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(cells.length >= 2)
+      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -832,24 +835,20 @@ export default class Table extends Container {
           }
         });
       }
-      let heights = this.heights.slice();
-      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-      this.set('heights', heights);
-
-      this.model.rows += 1;
-
-      this.clearCache();
     });
-    // let heights = this.heights.slice();
-    // heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-    // this.set('heights', heights);
-    //
-    // this.model.rows += rows.length;
-    //
-    // this.clearCache();
+    let heights = this.heights.slice();
+    heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+    this.set('heights', heights);
+
+    this.model.rows += rows.length;
+
+    this.clearCache();
   }
 
   insertCellsBelow(cells) {
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(cells.length >= 2)
+      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -867,7 +866,7 @@ export default class Table extends Container {
     rows.forEach((row) => {
       // rows에서 가로 방향으로 이동하면서 병합된 셀을 찾는다.
       let mergedCells = this.findMergedCellByX(row);
-      // mergedCells.length가 0이면 일반적으로 행을 위에 추가한다.
+      // mergedCells.length가 0이면 일반적으로 행을 아래에 추가한다.
       if(mergedCells.length === 0) {
         for(let i = 0;i < this.columns;i++)
           newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
@@ -879,10 +878,6 @@ export default class Table extends Container {
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
       else {
-        // 선택한 행이 2개 이상 있고 그 중에 병합된 셀이 적어도 한 개라도 있으면
-        // 병합된 셀이 포함된 행의 추가는 무시한다. 임시방편으로 막아놈
-        if(rows.length > 1)
-          return false;
         // 추가할 행에서 병합된 셀을 추가할 때 해당 셀을 임시로 저장
         let temp = [];
         // 부모 셀을 저장
@@ -951,132 +946,317 @@ export default class Table extends Container {
           }
         });
       }
-      let heights = this.heights.slice();
-      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-      this.set('heights', heights);
-
-      this.model.rows += 1;
-
-      this.clearCache();
     });
 
-    // var rows = []
+    let heights = this.heights.slice();
+    heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+    this.set('heights', heights);
+
+    this.model.rows += 1;
+
+    this.clearCache();
+  }
+
+  insertCellsLeft(cells) {
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(cells.length >= 2)
+      return false;
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(-1 == columns.indexOf(column))
+        columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
+    let insertionColumnPosition = columns[0];
+    let newbieColumnWidths = [];
+    let newbieCells = [];
+    columns.forEach((column) => {
+      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
+      let mergedCells = this.findMergedCellByY(column);
+      // mergedCells.length가 0이면 일반적으로 열을 왼쪽에 추가한다.
+      if(mergedCells.length === 0 ) {
+        for(let i = 0; i < this.rows; i++)
+          newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+        newbieColumnWidths.push(this.widths[column]);
+
+        let increasedColumns = this.columns;
+        let index = this.rows;
+        newbieCells.reverse().forEach((cell) => {
+          if(index == 0) {
+            index = this.rows;
+            increasedColumns++;
+          }
+
+          index--;
+          this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+        });
+      }
+      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
+      else {
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스 값을 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.getRowColumn(cell).column;
+          row = this.getRowColumn(cell).row;
+          index = row * this.columns + col + 1;
+          while(index) {
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.getRowColumn(component).column;
+              let spColEnd = this.getRowColumn(component).column + component.colspan;
+              let spRowStart = this.getRowColumn(component).row;
+              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        superCellIndexes.forEach((index) => {
+          let superCellColumn = index % this.columns;
+          let superCellObj = {
+            rowspan : this.components[index].rowspan,
+            colspan : this.components[index].colspan,
+            text : this.components[index].get('text'),
+            merged : this.components[index].merged
+          }
+          // 추가하려는 열이 슈퍼셀을 포함한 경우
+          if(superCellColumn === column) {
+            for(let i = 0; i < this.rows; i++)
+              newbieCells.push(buildNewCell(this.app));
+            newbieColumnWidths.push(this.widths[column]);
+
+            let increasedColumns = this.columns;
+            let rowIndex = this.rows;
+            newbieCells.reverse().forEach((cell) => {
+              if(rowIndex == 0) {
+                rowIndex = this.rows;
+                increasedColumns++;
+              }
+
+              rowIndex--;
+              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
+            });
+          } else {
+            this.components[index].colspan += 1;
+            for(let i = 0; i < this.rows; i++)
+              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+            newbieColumnWidths.push(this.widths[column]);
+
+            let increasedColumns = this.columns;
+            let rowIndex = this.rows;
+            newbieCells.reverse().forEach((cell) => {
+              if(rowIndex == 0) {
+                rowIndex = this.rows;
+                increasedColumns++;
+              }
+
+              rowIndex--;
+              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
+            });
+          }
+        });
+      }
+    });
+    let widths = this.widths.slice();
+    this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+    this.set('widths', widths);
+  }
+
+  insertCellsRight(cells) {
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if(cells.length >= 2)
+      return false;
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(-1 == columns.indexOf(column))
+        columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
+    let insertionColumnPosition = columns[columns.length - 1] + 1;
+    let newbieColumnWidths = [];
+    let newbieCells = [];
+    columns.forEach((column) => {
+      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
+      let mergedCells = this.findMergedCellByY(column);
+      // mergedCells.length가 0이면 일반적으로 열을 오른쪽에 추가한다.
+      if(mergedCells.length === 0 ) {
+        for(let i = 0; i < this.rows; i++)
+          newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+        newbieColumnWidths.push(this.widths[column]);
+
+        let increasedColumns = this.columns;
+        let index = this.rows;
+        newbieCells.reverse().forEach((cell) => {
+          if(index == 0) {
+            index = this.rows;
+            increasedColumns++;
+          }
+
+          index--;
+          this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+        });
+      }
+      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
+      else {
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스 값을 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.getRowColumn(cell).column;
+          row = this.getRowColumn(cell).row;
+          index = row * this.columns + col + 1;
+          while(index) {
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.getRowColumn(component).column;
+              let spColEnd = this.getRowColumn(component).column + component.colspan;
+              let spRowStart = this.getRowColumn(component).row;
+              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        superCellIndexes.forEach((index) => {
+          let superCellColumn = index % this.columns;
+          let superCellObj = {
+            rowspan : this.components[index].rowspan,
+            colspan : this.components[index].colspan,
+            text : this.components[index].get('text'),
+            merged : this.components[index].merged
+          }
+          // 추가하려는 열이 병합된 셀중 마지막 열인 경우
+          if((superCellColumn + superCellObj.colspan - 1) === column) {
+            for(let i = 0; i < this.rows; i++)
+              newbieCells.push(buildNewCell(this.app));
+            newbieColumnWidths.push(this.widths[column]);
+
+            let increasedColumns = this.columns;
+            let rowIndex = this.rows;
+            newbieCells.reverse().forEach((cell) => {
+              if(rowIndex == 0) {
+                rowIndex = this.rows;
+                increasedColumns++;
+              }
+
+              rowIndex--;
+              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
+            });
+          } else if(superCellColumn === column) {
+            this.components[index].colspan += 1;
+            for(let i = 0; i < this.rows; i++)
+              newbieCells.push(buildCopiedCell(this.components[(column + 1) + this.columns * i].model, this.app));
+            newbieColumnWidths.push(this.widths[column]);
+
+            let increasedColumns = this.columns;
+            let rowIndex = this.rows;
+            newbieCells.reverse().forEach((cell) => {
+              if(rowIndex == 0) {
+                rowIndex = this.rows;
+                increasedColumns++;
+              }
+
+              rowIndex--;
+              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
+            });
+          } else {
+            this.components[index].colspan += 1;
+            for(let i = 0; i < this.rows; i++)
+              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+            newbieColumnWidths.push(this.widths[column]);
+
+            let increasedColumns = this.columns;
+            let rowIndex = this.rows;
+            newbieCells.reverse().forEach((cell) => {
+              if(rowIndex == 0) {
+                rowIndex = this.rows;
+                increasedColumns++;
+              }
+
+              rowIndex--;
+              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
+            });
+          }
+        });
+      }
+    });
+    let widths = this.widths.slice();
+    this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+    this.set('widths', widths);
+    // var columns = []
     //
     // cells.forEach((cell) => {
     //   let rowcolumn = this.getRowColumn(cell)
     //
-    //   if(-1 == rows.indexOf(rowcolumn.row))
-    //     rows.push(rowcolumn.row)
+    //   if(-1 == columns.indexOf(rowcolumn.column))
+    //     columns.push(rowcolumn.column)
     // })
     //
-    // rows.sort()
-    // // Insert Above와 이 부분만 다르다.
-    // var insertionRowPosition = rows[rows.length - 1] + 1
+    // columns.sort()
+    // // Insert Left와 이 부분만 다르다.
+    // var insertionColumnPosition = columns[columns.length - 1] + 1
     //
-    // var newbieRowHeights = []
+    // var newbieColumnWidths = []
     // var newbieCells = []
     //
-    // rows.forEach((row) => {
-    //   for(let i = 0;i < this.columns;i++)
-    //     newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
-    //   newbieRowHeights.push(this.heights[row])
+    // columns.forEach((column) => {
+    //   for(let i = 0;i < this.rows;i++)
+    //     newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
+    //   newbieColumnWidths.push(this.widths[column])
     // })
     //
+    // var increasedColumns = this.columns
+    // var index = this.rows
     // newbieCells.reverse().forEach((cell) => {
-    //   this.insertComponentAt(cell, insertionRowPosition * this.columns);
+    //   if(index == 0) {
+    //     index = this.rows
+    //     increasedColumns++
+    //   }
+    //
+    //   index--
+    //   this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
     // })
     //
-    // var heights = this.heights.slice()
-    // heights.splice(insertionRowPosition, 0, ...newbieRowHeights)
-    // this.set('heights', heights)
+    // var widths = this.widths.slice()
+    // this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
     //
-    // this.model.rows += rows.length
-    //
-    // this.clearCache()
-  }
-
-  insertCellsLeft(cells) {
-    var columns = []
-
-    cells.forEach((cell) => {
-      let rowcolumn = this.getRowColumn(cell)
-
-      if(-1 == columns.indexOf(rowcolumn.column))
-        columns.push(rowcolumn.column)
-    })
-
-    columns.sort()
-    var insertionColumnPosition = columns[0]
-
-    var newbieColumnWidths = []
-    var newbieCells = []
-
-    columns.forEach((column) => {
-      for(let i = 0;i < this.rows;i++)
-        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
-      newbieColumnWidths.push(this.widths[column])
-    })
-
-    var increasedColumns = this.columns
-    var index = this.rows
-    newbieCells.reverse().forEach((cell) => {
-      if(index == 0) {
-        index = this.rows
-        increasedColumns++
-      }
-
-      index--
-      this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-    })
-
-    var widths = this.widths.slice()
-    this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
-
-    this.set('widths', widths)
-  }
-
-  insertCellsRight(cells) {
-    var columns = []
-
-    cells.forEach((cell) => {
-      let rowcolumn = this.getRowColumn(cell)
-
-      if(-1 == columns.indexOf(rowcolumn.column))
-        columns.push(rowcolumn.column)
-    })
-
-    columns.sort()
-    // Insert Left와 이 부분만 다르다.
-    var insertionColumnPosition = columns[columns.length - 1] + 1
-
-    var newbieColumnWidths = []
-    var newbieCells = []
-
-    columns.forEach((column) => {
-      for(let i = 0;i < this.rows;i++)
-        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
-      newbieColumnWidths.push(this.widths[column])
-    })
-
-    var increasedColumns = this.columns
-    var index = this.rows
-    newbieCells.reverse().forEach((cell) => {
-      if(index == 0) {
-        index = this.rows
-        increasedColumns++
-      }
-
-      index--
-      this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-    })
-
-    var widths = this.widths.slice()
-    this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-    widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
-    this.set('widths', widths)
+    // widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
+    // this.set('widths', widths)
   }
 
   distributeHorizontal(cells) {
