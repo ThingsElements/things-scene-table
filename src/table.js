@@ -273,6 +273,51 @@ export default class Table extends Container {
 
     if(newrows < oldrows) {
       let removals = this._components.slice(oldcolumns * newrows);
+
+      // 지우려는 셀중에 병합된 셀을 찾는다.
+      let mergedCells = [];
+      removals.forEach((cell) => {
+        if(cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
+          mergedCells.push(cell);
+      });
+
+      // 병합된 셀 중에서 슈퍼셀을 찾는다.
+      if(mergedCells.length > 0){
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스를 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.components.indexOf(cell) % oldcolumns;
+          row = Math.floor(this.components.indexOf(cell) / oldcolumns);
+          index = row * oldcolumns + col + 1;
+          while(index){
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.components.indexOf(component) % oldcolumns;
+              let spColEnd = this.components.indexOf(component) % oldcolumns + component.colspan;
+              let spRowStart = Math.floor(this.components.indexOf(component) / oldcolumns);
+              let spRowEnd = Math.floor(this.components.indexOf(component) / oldcolumns) + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        // 슈퍼셀에서 colspan 을 감소시킨다
+        superCells.forEach((cell) => {
+          // newcolumns < oldcolumns 케이스와 이 부분만 다름
+          cell.rowspan -= (oldrows - newrows);
+        });
+      }
+
       this.remove(removals);
     }
 
@@ -292,6 +337,49 @@ export default class Table extends Container {
           removals.push(this.components[r * oldcolumns + c])
         }
       }
+      // 지우려는 셀중에 병합된 셀을 찾는다.
+      let mergedCells = [];
+      removals.forEach((cell) => {
+        if(cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
+          mergedCells.push(cell);
+      });
+
+      // 병합된 셀 중에서 슈퍼셀을 찾는다.
+      if(mergedCells.length > 0){
+        // 부모 셀을 저장
+        let superCells = [];
+        // 부모 셀의 인덱스를 저장
+        let superCellIndexes = [];
+        mergedCells.forEach((cell) => {
+          let col, row, index;
+          col = this.components.indexOf(cell) % oldcolumns;
+          row = Math.floor(this.components.indexOf(cell) / oldcolumns);
+          index = row * oldcolumns + col + 1;
+          while(index){
+            --index;
+            let component = this.components[index];
+            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+            if(component.rowspan > 1 || component.colspan > 1){
+              let spColStart = this.components.indexOf(component) % oldcolumns;
+              let spColEnd = this.components.indexOf(component) % oldcolumns + component.colspan;
+              let spRowStart = Math.floor(this.components.indexOf(component) / oldcolumns);
+              let spRowEnd = Math.floor(this.components.indexOf(component) / oldcolumns) + component.rowspan;
+              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+                if(-1 == superCellIndexes.indexOf(index)){
+                  superCellIndexes.push(index);
+                  superCells.push(component);
+                }
+              }
+            }
+          }
+        });
+        // 슈퍼셀에서 colspan 을 감소시킨다
+        superCells.forEach((cell) => {
+          cell.colspan -= (oldcolumns - newcolumns);
+        });
+      }
+
       this.remove(removals);
     }
 
@@ -1246,46 +1334,6 @@ export default class Table extends Container {
         });
       }
     });
-
-    // var columns = []
-    //
-    // cells.forEach((cell) => {
-    //   let rowcolumn = this.getRowColumn(cell)
-    //
-    //   if(-1 == columns.indexOf(rowcolumn.column))
-    //     columns.push(rowcolumn.column)
-    // })
-    //
-    // columns.sort()
-    // // Insert Left와 이 부분만 다르다.
-    // var insertionColumnPosition = columns[columns.length - 1] + 1
-    //
-    // var newbieColumnWidths = []
-    // var newbieCells = []
-    //
-    // columns.forEach((column) => {
-    //   for(let i = 0;i < this.rows;i++)
-    //     newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
-    //   newbieColumnWidths.push(this.widths[column])
-    // })
-    //
-    // var increasedColumns = this.columns
-    // var index = this.rows
-    // newbieCells.reverse().forEach((cell) => {
-    //   if(index == 0) {
-    //     index = this.rows
-    //     increasedColumns++
-    //   }
-    //
-    //   index--
-    //   this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-    // })
-    //
-    // var widths = this.widths.slice()
-    // this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    //
-    // widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
-    // this.set('widths', widths)
   }
 
   distributeHorizontal(cells) {
