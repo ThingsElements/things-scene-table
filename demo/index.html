@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
 
     <link rel="import" href="../../things-designer-elements/things-editor-properties.html">
+    <link rel="import" href="../../things-scene-modeler/things-scene-properties.html">
 
     <link rel="import" href="./things-scene-table.html">
 
@@ -51,7 +52,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <things-editor-properties id='props' target="{{selected.0.model}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
 
-    </template>
+      <things-scene-properties scene="[[scene]]"
+                               selected="[[selected]]"
+                               model="{{target}}"
+                               bounds="{{bounds}}">
+        <fieldset>
+          <legend>table properties</legend>
+          <label>rows</label>
+            <input is="things-editor-number-input" number="{{target.rows::change}}"/>
+            <label>columns</label>
+            <input is="things-editor-number-input" number="{{target.columns::change}}"/>
+            <label>top</label>
+            <input is="things-editor-number-input" number="{{target.paddingTop::change}}"/>
+            <label>left</label>
+            <input is="things-editor-number-input" number="{{target.paddingLeft::change}}"/>
+            <label>right</label>
+            <input is="things-editor-number-input" number="{{target.paddingRight::change}}"/>
+            <label>bottom</label>
+            <input is="things-editor-number-input" number="{{target.paddingBottom::change}}"/>
+          </fieldset>
+        </things-scene-properties>
+
+      </template>
 
     <script>
     window.addEventListener('WebComponentsReady', function(e) {
@@ -104,6 +126,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
 
         switch(e.type) {
+        case 'table-merge-cells':
+          table.mergeCells(this.selected)
+          break;
+        case 'table-split-cells':
+          table.splitCells(this.selected)
+          break;
         case 'table-delete-row':
           table.deleteRows(this.selected)
           break;
@@ -121,10 +149,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           break;
         case 'table-insert-right':
           table.insertCellsRight(this.selected)
-          break;
-        case 'table-merge-cells':
-          break;
-        case 'table-split-cells':
           break;
         case 'table-distribute-horizontal':
           table.distributeHorizontal(this.selected)
@@ -159,6 +183,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           lineWidth: 1,
           rows: 5,
           columns: 10,
+          paddingTop: 5,
+          paddingLeft: 5,
+          paddingRight: 5,
+          paddingBottom: 5,
           data: [
             ['header1', 'header2', 'header3'],
             [100, 200, 300],
