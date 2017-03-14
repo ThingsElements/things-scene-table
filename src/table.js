@@ -663,6 +663,9 @@ export default class Table extends Container {
       rowspan: numberOfRows
     });
 
+    firstCell.model.border.bottom = firstCell.model.border.top;
+    firstCell.model.border.right = firstCell.model.border.left;
+
     // 첫 번째 셀을 제외한 나머지 셀을 true로 지정
     for(let i = 1; i < numberOfCells; i++)
       cells[i].merged = true;
