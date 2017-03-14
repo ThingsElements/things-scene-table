@@ -419,87 +419,110 @@ export default class Table extends Container {
 
       switch(where) {
       case 'all':
-        setCellBorder(cell, style, where);
+        setCellBorder(cell, CLEAR_STYLE, 'all');
 
         if(isLeftMost(total, columns, indices, i))
-          setCellBorder(components[before(columns, i)], style, 'right')
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
         if(isRightMost(total, columns, indices, i))
-          setCellBorder(components[after(columns, i)], style, 'left')
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left');
         if(isTopMost(total, columns, indices, i))
-          setCellBorder(components[above(columns, i)], style, 'bottom')
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
         if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], style, 'top')
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
+
+        setCellBorder(cell, style, 'left');
+        setCellBorder(cell, style, 'top');
+
+        if(isRightMost(total, columns, indices, i)) {
+          //setCellBorder(components[after(columns, i)], style, 'left');
+          setCellBorder(cell, style, 'right');
+        }
+        if(isBottomMost(total, columns, indices, i)) {
+          //setCellBorder(components[below(columns, i)], style, 'top');
+          setCellBorder(cell, style, 'bottom');
+        }
         break;
       case 'in':
         if(!isLeftMost(total, columns, indices, i)) {
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
           setCellBorder(cell, style, 'left')
         }
-        if(!isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right')
-        }
         if(!isTopMost(total, columns, indices, i)) {
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
           setCellBorder(cell, style, 'top')
-        }
-        if(!isBottomMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'bottom')
         }
         break;
       case 'out':
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
+
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          setCellBorder(components[before(columns, i)], style, 'right')
+          //setCellBorder(components[before(columns, i)], style, 'right')
         }
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          setCellBorder(components[after(columns, i)], style, 'left')
+          //setCellBorder(components[after(columns, i)], style, 'left')
         }
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          setCellBorder(components[above(columns, i)], style, 'bottom')
+          //setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          setCellBorder(components[below(columns, i)], style, 'top')
+          //setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'left':
+        if(isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
-          setCellBorder(components[before(columns, i)], style, 'right')
+          //setCellBorder(components[before(columns, i)], style, 'right')
         }
         break;
       case 'right':
+        if(isRightMost(total, columns, indices, i))
+          setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
-          setCellBorder(components[after(columns, i)], style, 'left')
+          //setCellBorder(components[after(columns, i)], style, 'left')
         }
         break;
       case 'center':
+        if(!isLeftMost(total, columns, indices, i))
+          setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
         if(!isLeftMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'left')
         }
-        if(!isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right')
-        }
         break;
       case 'middle':
+        if(!isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
         if(!isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
         }
-        if(!isBottomMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'bottom')
-        }
         break;
       case 'top':
+        if(isTopMost(total, columns, indices, i))
+          setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
         if(isTopMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'top')
-          setCellBorder(components[above(columns, i)], style, 'bottom')
+          // setCellBorder(components[above(columns, i)], style, 'bottom')
         }
         break;
       case 'bottom':
+        if(isBottomMost(total, columns, indices, i))
+          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          setCellBorder(components[below(columns, i)], style, 'top')
+          //setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'clear':
@@ -853,6 +876,14 @@ export default class Table extends Container {
         newbieCells.reverse().forEach((cell) => {
           this.insertComponentAt(cell, insertionRowPosition * this.columns);
         });
+
+        let heights = this.heights.slice();
+        heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+        this.set('heights', heights);
+
+        this.model.rows += rows.length;
+
+        this.clearCache();
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
       else {
@@ -967,6 +998,14 @@ export default class Table extends Container {
         newbieCells.reverse().forEach((cell) => {
           this.insertComponentAt(cell, insertionRowPosition * this.columns);
         });
+
+        let heights = this.heights.slice();
+        heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+        this.set('heights', heights);
+
+        this.model.rows += 1;
+
+        this.clearCache();
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
       else {
@@ -1096,6 +1135,13 @@ export default class Table extends Container {
           index--;
           this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
         });
+
+        let widths = this.widths.slice();
+        this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+        widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+        this.set('widths', widths);
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
       else {
@@ -1223,6 +1269,13 @@ export default class Table extends Container {
           index--;
           this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
         });
+
+        let widths = this.widths.slice();
+        this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+        widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+
+        this.set('widths', widths);
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
       else {
