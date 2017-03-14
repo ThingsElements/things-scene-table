@@ -46,8 +46,26 @@ const EMPTY_BORDER = {}
     return NATURE
   }
 
+  set merged(merged) {
+    this.set('merged', !!merged)
+    if(merged)
+      this.set('text', '')
+  }
+
+  get merged() {
+    return this.get('merged')
+  }
+
+  set rowspan(rowspan) {
+    this.set('rowspan', rowspan);
+  }
+
   get rowspan() {
     return this.get('rowspan')
+  }
+
+  set colspan(colspan) {
+    this.set('colspan', colspan);
   }
 
   get colspan() {
@@ -89,6 +107,10 @@ const EMPTY_BORDER = {}
     this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
     this._drawBorder(context, left, top + height, left, top, border.left);
   }
+
+  // get capturable() {
+  //   return super.capturable && !this.merged
+  // }
 
   // _post_draw(context) {
   //
