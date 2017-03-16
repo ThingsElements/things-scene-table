@@ -96,19 +96,60 @@ function setCellBorder(cell, style, where) {
 }
 
 function isLeftMost(total, columns, indices, i) {
-  return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1;
+  // e.g.) indices = [3, 4, 5, 6, 7, 13, 14, 17, 23, 27, 33, 37, 43, 44, 45, 46, 47]; 인 경우
+  // leftMostIndices = [3, 13, 23, 33, 43]; 이 됨
+  // 일의 자리 숫자 중 가장 작은 숫자들의 모임. 즉 왼쪽 끝
+  var leftMostIndices = indices.filter((value, index) => {
+    if(index == 0){
+      return true
+    }
+    else if(indices[index] % columns > indices[index - 1] % columns){
+      return false;
+    }
+    return true;
+  });
+  return i == 0 || !(i % columns) || leftMostIndices.indexOf(i) != -1;;
 }
 
 function isRightMost(total, columns, indices, i) {
-  return i == total - 1 || (i % columns == columns - 1) || indices.indexOf(i + 1) == -1;
+  // e.g.) indices = [3, 4, 5, 6, 7, 13, 14, 17, 23, 27, 33, 37, 43, 44, 45, 46, 47]; 인 경우
+  // rightMostIndices = [7, 17, 27, 37, 47]; 이 됨
+  // 일의 자리 숫자 중 가장 큰 숫자들의 모임. 즉 오른쪽 끝
+  let rightMostIndices = indices.filter((value, index) => {
+    if(indices[index] % columns < indices[index + 1] % columns){
+      return false;
+    }
+    return true;
+  });
+  return i == total - 1 || (i % columns == columns - 1) || rightMostIndices.indexOf(i) != -1;
 }
 
 function isTopMost(total, columns, indices, i) {
-  return i < columns || indices.indexOf(i - columns) == -1;
+  // e.g.) indices = [3, 4, 5, 6, 7, 13, 14, 17, 23, 27, 33, 37, 43, 44, 45, 46, 47]; 인 경우
+  // topMostIndices = [3, 4, 5, 6, 7]; 이 됨
+  // 행이 바뀌기 전까지의 숫자. 즉 가장 위
+  let topMostIndices = indices.filter((value, index) => {
+    if(value < indices[0] + columns)
+      return true;
+    return false;
+  });
+  return i < columns || topMostIndices.indexOf(i) != -1;
 }
 
 function isBottomMost(total, columns, indices, i) {
-  return i > (total - columns - 1) || indices.indexOf(i + columns) == -1;
+  // e.g.) indices = [3, 4, 5, 6, 7, 13, 14, 17, 23, 27, 33, 37, 43, 44, 45, 46, 47]; 인 경우
+  // bottomMostIndices = [47, 46, 45, 44, 43]; 이 됨
+  // 행의 순서를 뒤집고 행이 바뀌기 전까지의 숫자. 즉 가장 아래
+  let reverseIndices = JSON.parse(JSON.stringify(indices));
+  reverseIndices.sort((a, b) => {
+    return b - a;
+  })
+  let bottomMostIndices = reverseIndices.filter((value, index) => {
+    if(value > reverseIndices[0] - columns)
+      return true;
+    return false;
+  });
+  return i > (total - columns - 1) || bottomMostIndices.indexOf(i) != -1;
 }
 
 function above(columns, i) {
@@ -413,10 +454,8 @@ export default class Table extends Container {
     var total = components.length;
     var columns = this.get('columns');
     var indices = cells.map(cell => components.indexOf(cell));
-
     indices.forEach(i => {
       var cell = components[i];
-
       switch(where) {
       case 'all':
         setCellBorder(cell, CLEAR_STYLE, 'all');
@@ -490,6 +529,7 @@ export default class Table extends Container {
       case 'right':
         if(isRightMost(total, columns, indices, i))
           setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
+
         if(isRightMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'right')
           //setCellBorder(components[after(columns, i)], style, 'left')
@@ -607,11 +647,6 @@ export default class Table extends Container {
     return mergedCells;
   }
 
-  // 병합된 셀을 찾은 후 좌측 방향으로 rowspan이나 colspan이 1보다 큰 값을 찾는다.
-  findSuperCell() {
-
-  }
-
   mergeCells(cells) {
     // 선택한 셀이 들어있는 행
     let mergeableRows = [];
@@ -663,9 +698,6 @@ export default class Table extends Container {
       rowspan: numberOfRows
     });
 
-    firstCell.model.border.bottom = firstCell.model.border.top;
-    firstCell.model.border.right = firstCell.model.border.left;
-
     // 첫 번째 셀을 제외한 나머지 셀을 true로 지정
     for(let i = 1; i < numberOfCells; i++)
       cells[i].merged = true;
@@ -702,6 +734,9 @@ export default class Table extends Container {
   }
 
   deleteRows(cells) {
+    // 만약 선택한 셀이 병합된 셀이라면 삭제하지 않는다.
+    if(cells[0].merged == true)
+      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -776,6 +811,9 @@ export default class Table extends Container {
   }
 
   deleteColumns(cells) {
+    // 만약 선택한 셀이 병합된 셀이라면 삭제하지 않는다.
+    if(cells[0].merged == true)
+      return false;
     // 먼저 cells 위치의 열을 구한다.
     let columns = [];
     cells.forEach((cell) => {
