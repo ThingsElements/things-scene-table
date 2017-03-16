@@ -103,7 +103,10 @@ function isLeftMost(total, columns, indices, i) {
     if(index == 0){
       return true
     }
-    else if(indices[index] % columns > indices[index - 1] % columns){
+    else if(indices[index - 1] % columns < indices[index] % columns){
+      return false;
+    }
+    else if(indices[0] % columns !== indices[index] % columns){
       return false;
     }
     return true;
@@ -113,13 +116,22 @@ function isLeftMost(total, columns, indices, i) {
 
 function isRightMost(total, columns, indices, i) {
   // e.g.) indices = [3, 4, 5, 6, 7, 13, 14, 17, 23, 27, 33, 37, 43, 44, 45, 46, 47]; 인 경우
+  // reverseIndices = [47, 46, 45, 44, 43, 37, 33, 27, 23, 17, 14, 13, 7, 6, 5, 4, 3];
   // rightMostIndices = [7, 17, 27, 37, 47]; 이 됨
   // 일의 자리 숫자 중 가장 큰 숫자들의 모임. 즉 오른쪽 끝
-  let rightMostIndices = indices.filter((value, index) => {
-    if(indices[index] % columns < indices[index + 1] % columns){
+  let reverseIndices = JSON.parse(JSON.stringify(indices));
+  reverseIndices.sort((a, b) => {
+    return b - a;
+  });
+  let rightMostIndices = reverseIndices.filter((value, index) => {
+    if(reverseIndices[index] % columns > reverseIndices[index + 1] % columns){
       return false;
     }
-    return true;
+    else if(reverseIndices[0] % columns !== reverseIndices[index] % columns){
+      return false;
+    }
+    else
+      return true;
   });
   return i == total - 1 || (i % columns == columns - 1) || rightMostIndices.indexOf(i) != -1;
 }
@@ -143,7 +155,7 @@ function isBottomMost(total, columns, indices, i) {
   let reverseIndices = JSON.parse(JSON.stringify(indices));
   reverseIndices.sort((a, b) => {
     return b - a;
-  })
+  });
   let bottomMostIndices = reverseIndices.filter((value, index) => {
     if(value > reverseIndices[0] - columns)
       return true;
