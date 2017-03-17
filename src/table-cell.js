@@ -30,6 +30,14 @@ const NATURE = {
 
 const EMPTY_BORDER = {}
 
+function isBottomMost(idx, rows, columns) {
+  return idx >= (rows - 1) * columns
+}
+
+function isRightMost(idx, rows, columns) {
+  return (idx + 1) % columns == 0
+}
+
 /**
  * 1. 스타일을 상속 받아야 함. (cascade-style)
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
@@ -102,10 +110,17 @@ const EMPTY_BORDER = {}
     this.drawFill(context);
 
     // Border 그리기
+    var parent = this.parent
+    var idx = parent.components.indexOf(this)
+    var columns = parent.columns || 1
+    var rows = parent.rows || 1
+
     this._drawBorder(context, left, top, left + width, top, border.top);
-    this._drawBorder(context, left + width, top, left + width, top + height, border.right);
-    this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
     this._drawBorder(context, left, top + height, left, top, border.left);
+    if(isRightMost(idx, rows, columns))
+      this._drawBorder(context, left + width, top, left + width, top + height, border.right);
+    if(isBottomMost(idx, rows, columns))
+      this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
   }
 
   // get capturable() {
