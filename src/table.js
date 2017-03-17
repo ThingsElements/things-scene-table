@@ -413,6 +413,7 @@ export default class Table extends Container {
     var total = components.length;
     var columns = this.get('columns');
 
+    // 병합된 셀도 포함시킨다.
     var _cells = []
     cells.forEach(c => {
       _cells.push(c);
