@@ -426,7 +426,6 @@ export default class Table extends Container {
               _cells.push(this.components[i * this.columns + j]);
       }
     })
-    console.log(_cells);
     var indices = _cells.map(cell => components.indexOf(cell));
     indices.forEach(i => {
       var cell = components[i];
