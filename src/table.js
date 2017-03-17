@@ -119,20 +119,22 @@ function isRightMost(total, columns, indices, i) {
   // reverseIndices = [47, 46, 45, 44, 43, 37, 33, 27, 23, 17, 14, 13, 7, 6, 5, 4, 3];
   // rightMostIndices = [7, 17, 27, 37, 47]; 이 됨
   // 일의 자리 숫자 중 가장 큰 숫자들의 모임. 즉 오른쪽 끝
+  console.log(indices);
   let reverseIndices = JSON.parse(JSON.stringify(indices));
   reverseIndices.sort((a, b) => {
     return b - a;
   });
   let rightMostIndices = reverseIndices.filter((value, index) => {
-    if(reverseIndices[index] % columns > reverseIndices[index + 1] % columns){
-      return false;
+    if(index == 0){
+      return true
     }
-    else if(reverseIndices[0] % columns !== reverseIndices[index] % columns){
+    if(reverseIndices[index - 1] % columns > reverseIndices[index] % columns){
       return false;
     }
     else
       return true;
   });
+  console.log(rightMostIndices);
   return i == total - 1 || (i % columns == columns - 1) || rightMostIndices.indexOf(i) != -1;
 }
 
@@ -465,7 +467,21 @@ export default class Table extends Container {
     var components = this.components;
     var total = components.length;
     var columns = this.get('columns');
-    var indices = cells.map(cell => components.indexOf(cell));
+
+    var _cells = []
+    cells.forEach(c => {
+      _cells.push(c);
+      if(c.colspan || c.rowspan) {
+        let col = this.getRowColumn(c).column;
+        let row = this.getRowColumn(c).row;
+        for(let i = row; i < row + c.rowspan; i++)
+          for(let j = col; j < col + c.colspan; j++)
+            if(i != row || j != col)
+              _cells.push(this.components[i * this.columns + j]);
+      }
+    })
+    console.log(_cells);
+    var indices = _cells.map(cell => components.indexOf(cell));
     indices.forEach(i => {
       var cell = components[i];
       switch(where) {
@@ -543,8 +559,8 @@ export default class Table extends Container {
           setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
 
         if(isRightMost(total, columns, indices, i)) {
-          setCellBorder(cell, style, 'right')
-          //setCellBorder(components[after(columns, i)], style, 'left')
+          //setCellBorder(cell, style, 'right')
+          setCellBorder(components[after(columns, i)], style, 'left')
         }
         break;
       case 'center':
@@ -570,11 +586,14 @@ export default class Table extends Container {
         }
         break;
       case 'bottom':
-        if(isBottomMost(total, columns, indices, i))
-          setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
+        if(isBottomMost(total, columns, indices, i)) {
+          let _below = components[below(columns, i)]
+          if(_below)
+            setCellBorder(_below, CLEAR_STYLE, 'top');
+        }
         if(isBottomMost(total, columns, indices, i)) {
           setCellBorder(cell, style, 'bottom')
-          //setCellBorder(components[below(columns, i)], style, 'top')
+          setCellBorder(components[below(columns, i)], style, 'top')
         }
         break;
       case 'clear':
