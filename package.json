@@ -8,7 +8,6 @@
   },
   "scripts": {
     "serve": "watchify src/*.js -o things-scene-table.js src/index.js & polyserve",
-    "test": "./node_modules/.bin/mocha --require should --compilers js:babel-core/register test/**/test-*.js",
     "build": "browserify src/index.js -o things-scene-table.js && uglifyjs things-scene-table.js -o things-scene-table-min.js"
   },
   "repository": {
@@ -36,8 +35,7 @@
     "mocha": "^2.3.4",
     "should": "^8.0.2",
     "uglifyjs": "^2.4.10",
-    "watchify": "^3.3.1",
-    "node-canvas": "Automattic/node-canvas"
+    "watchify": "^3.3.1"
   },
   "dependencies": {
   }
