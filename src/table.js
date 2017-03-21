@@ -650,7 +650,6 @@ export default class Table extends Container {
           if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
             if(-1 == superCellIndexes.indexOf(index)){
               superCellIndexes.push(index);
-              superCells.push(component);
             }
           }
         }
@@ -662,27 +661,17 @@ export default class Table extends Container {
 
   mergeCells(cells) {
     // 선택한 셀이 들어있는 행
-    let mergeableRows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == mergeableRows.indexOf(row))
-        mergeableRows.push(row);
-    });
+    let mergeableRows = this.getRowsByCells(cells);
 
     // 선택한 셀의 행이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if(mergeableRows.length - 1 !== (mergeableRows[mergeableRows.length - 1] - mergeableRows[0]))
+    if(mergeableRows.length - 1 !== Math.abs((mergeableRows[mergeableRows.length - 1] - mergeableRows[0])))
      return false;
 
     // 선택한 셀이 들어있는 열
-    let mergeableColumns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == mergeableColumns.indexOf(column))
-        mergeableColumns.push(column);
-    });
+    let mergeableColumns = this.getColumnsByCells(cells);
 
     // 선택한 셀의 열이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if(mergeableColumns.length - 1 !== (mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0]))
+    if(mergeableColumns.length - 1 !== Math.abs((mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0])))
      return false;
 
     // 병합할 행의 수
