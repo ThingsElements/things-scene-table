@@ -597,17 +597,11 @@ export default class Table extends Container {
     return mergedCells;
   }
 
-  mergeCells(cells) {
-    // 선택한 셀이 들어있는 행
-    let mergeableRows = [];
+  // 선택한 셀의 행을 구한다.
+  getRowsByCells(cells) {
+    let rows = [];
     cells.forEach((cell) => {
       let row = this.getRowColumn(cell).row;
-<<<<<<< HEAD
-      if(-1 == mergeableRows.indexOf(row))
-        mergeableRows.push(row);
-    });
-
-=======
       if(-1 == rows.indexOf(row))
         rows.push(row);
     });
@@ -656,7 +650,6 @@ export default class Table extends Container {
           if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
             if(-1 == superCellIndexes.indexOf(index)){
               superCellIndexes.push(index);
-              superCells.push(component);
             }
           }
         }
@@ -668,28 +661,17 @@ export default class Table extends Container {
 
   mergeCells(cells) {
     // 선택한 셀이 들어있는 행
-    let mergeableRows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == mergeableRows.indexOf(row))
-        mergeableRows.push(row);
-    });
+    let mergeableRows = this.getRowsByCells(cells);
 
->>>>>>> parent of afcbf79... 셀병합 수
     // 선택한 셀의 행이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if(mergeableRows.length - 1 !== (mergeableRows[mergeableRows.length - 1] - mergeableRows[0]))
+    if(mergeableRows.length - 1 !== Math.abs((mergeableRows[mergeableRows.length - 1] - mergeableRows[0])))
      return false;
 
     // 선택한 셀이 들어있는 열
-    let mergeableColumns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == mergeableColumns.indexOf(column))
-        mergeableColumns.push(column);
-    });
+    let mergeableColumns = this.getColumnsByCells(cells);
 
     // 선택한 셀의 열이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if(mergeableColumns.length - 1 !== (mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0]))
+    if(mergeableColumns.length - 1 !== Math.abs((mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0])))
      return false;
 
     // 병합할 행의 수
@@ -779,36 +761,8 @@ export default class Table extends Container {
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 지워야 한다.
       //
       else {
-        // 삭제할 행에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
         // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index){
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           let superCellRow = Math.floor(index/this.columns);
           // 지우려는 행이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 행의 셀이 아닌 경우
@@ -856,36 +810,8 @@ export default class Table extends Container {
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 지워야 한다.
       else {
-        // 삭제할 열에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스를 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index){
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        // 부모 셀의 인덱스 값을 저장
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           let superCellColumn = index % this.columns;
           // 지우려는 열이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 열의 셀이 아닌 경우
@@ -909,16 +835,8 @@ export default class Table extends Container {
 
   insertCellsAbove(cells) {
     // 먼저 cells 위치의 행을 구한다.
-    let rows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == rows.indexOf(row))
-        rows.push(row);
-    });
-    rows.sort((a, b) => {
-      return a - b;
-    });
-    rows.reverse();
+    let rows = this.getRowsByCells(cells);
+
     // 행 2개 이상은 추가 안함. 임시로 막아놓음
     if(rows.length >= 2)
       return false;
@@ -952,36 +870,8 @@ export default class Table extends Container {
         // 병합된 셀이 포함된 행의 추가는 무시한다. 임시방편으로 막아놈
         if(rows.length > 1)
           return false;
-        // 추가할 행에서 병합된 셀을 추가할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
         // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
           if(superCellIndexes.length >= 2)
@@ -1031,16 +921,8 @@ export default class Table extends Container {
 
   insertCellsBelow(cells) {
     // 먼저 cells 위치의 행을 구한다.
-    let rows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if(-1 == rows.indexOf(row))
-        rows.push(row);
-    });
-    rows.sort((a, b) => {
-      return a - b;
-    });
-    rows.reverse();
+    let rows = this.getRowsByCells(cells);
+
     // 행 2개 이상은 추가 안함. 임시로 막아놓음
     if(rows.length >= 2)
       return false;
@@ -1070,36 +952,8 @@ export default class Table extends Container {
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
       else {
-        // 추가할 행에서 병합된 셀을 추가할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
         // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
           if(superCellIndexes.length >= 2)
@@ -1160,16 +1014,7 @@ export default class Table extends Container {
 
   insertCellsLeft(cells) {
     // 먼저 cells 위치의 열을 구한다.
-    let columns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == columns.indexOf(column))
-        columns.push(column);
-    });
-    columns.sort((a, b) => {
-      return a - b;
-    });
-    columns.reverse();
+    let columns = this.getColumnsByCells(cells);
     // 열 2개 이상은 추가 안함. 임시로 막아놓음
     if(columns.length >= 2)
       return false;
@@ -1206,34 +1051,8 @@ export default class Table extends Container {
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
       else {
-        // 부모 셀을 저장
-        let superCells = [];
         // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
           if(superCellIndexes.length >= 2)
@@ -1294,16 +1113,7 @@ export default class Table extends Container {
 
   insertCellsRight(cells) {
     // 먼저 cells 위치의 열을 구한다.
-    let columns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if(-1 == columns.indexOf(column))
-        columns.push(column);
-    });
-    columns.sort((a, b) => {
-      return a - b;
-    });
-    columns.reverse();
+    let columns = this.getColumnsByCells(cells);
     // 열 2개 이상은 추가 안함. 임시로 막아놓음
     if(columns.length >= 2)
       return false;
@@ -1340,34 +1150,8 @@ export default class Table extends Container {
       }
       // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
       else {
-        // 부모 셀을 저장
-        let superCells = [];
         // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while(index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if(component.rowspan > 1 || component.colspan > 1){
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
-                if(-1 == superCellIndexes.indexOf(index)){
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
+        let superCellIndexes = this.getSuperCellIndexes(mergedCells);
         superCellIndexes.forEach((index) => {
           // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
           if(superCellIndexes.length >= 2)

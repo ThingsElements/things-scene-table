@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import '../../bower_components/things-scene/things-scene-min'
 import { Table } from '../../src/index'
 
-describe('Table - 컬럼 추가하기', function () {
+describe('Table - 열 추가하기', function () {
 
   var board;
 
@@ -22,7 +22,7 @@ describe('Table - 컬럼 추가하기', function () {
     })
   });
 
-  it('첫번째 셀의 왼쪽에 컬럼을 추가하면, columns 값이 하나 증가해야한다.', function () {
+  it('첫 번째 셀의 왼쪽에 컬럼을 추가하면, columns 값이 하나 증가해야한다.', function () {
 
     var table = board.findById('table')
 
@@ -34,7 +34,7 @@ describe('Table - 컬럼 추가하기', function () {
     expect(table.get('columns')).to.equal(columns + 1)
   });
 
-  it('insertCellsLeft 하면 셀의 왼쪽에 컬럼이 추가되어야 한다.', function() {
+  it('insertCellsLeft 하면 선택한 셀의 인덱스 값이 하나 증가해야한다.', function() {
 
     var table = board.findById('table');
 
@@ -59,5 +59,20 @@ describe('Table - 컬럼 추가하기', function () {
     table.insertCellsRight([cell]);
 
     expect(table.get('columns')).to.equal(columns + 1);
+  });
+
+  it('insertCellsRight 하면 선택한 셀의 인덱스 값이 증가하면 안된다.', function(){
+
+    var table = board.findById('table');
+
+    var cell = table.components[0];
+
+    var beforeIndex = table.components.indexOf(cell);
+
+    table.insertCellsRight([cell]);
+
+    var afterIndex = table.components.indexOf(cell);
+
+    expect(afterIndex).to.equal(beforeIndex);
   });
 });
