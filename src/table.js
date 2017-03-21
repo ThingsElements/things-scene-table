@@ -602,10 +602,80 @@ export default class Table extends Container {
     let mergeableRows = [];
     cells.forEach((cell) => {
       let row = this.getRowColumn(cell).row;
+<<<<<<< HEAD
       if(-1 == mergeableRows.indexOf(row))
         mergeableRows.push(row);
     });
 
+=======
+      if(-1 == rows.indexOf(row))
+        rows.push(row);
+    });
+    rows.sort((a, b) => {
+      return a - b;
+    });
+    rows.reverse();
+
+    return rows;
+  }
+
+  // 선택한 셀의 열을 구한다.
+  getColumnsByCells(cells) {
+    let columns = [];
+    cells.forEach((cell) => {
+      let column = this.getRowColumn(cell).column;
+      if(-1 == columns.indexOf(column))
+        columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
+
+    return columns;
+  }
+
+  // 병합된 셀에서 슈퍼셀의 인덱스 값을 구한다.
+  getSuperCellIndexes(mergedCells) {
+    let superCellIndexes = [];
+    mergedCells.forEach((cell) => {
+      let col, row, index;
+      col = this.getRowColumn(cell).column;
+      row = this.getRowColumn(cell).row;
+      index = row * this.columns + col + 1;
+      while(index) {
+        --index;
+        let component = this.components[index];
+        // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
+        if(component.rowspan > 1 || component.colspan > 1){
+          let spColStart = this.getRowColumn(component).column;
+          let spColEnd = this.getRowColumn(component).column + component.colspan;
+          let spRowStart = this.getRowColumn(component).row;
+          let spRowEnd = this.getRowColumn(component).row + component.rowspan;
+          // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
+          if((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)){
+            if(-1 == superCellIndexes.indexOf(index)){
+              superCellIndexes.push(index);
+              superCells.push(component);
+            }
+          }
+        }
+      }
+    });
+
+    return superCellIndexes;
+  }
+
+  mergeCells(cells) {
+    // 선택한 셀이 들어있는 행
+    let mergeableRows = [];
+    cells.forEach((cell) => {
+      let row = this.getRowColumn(cell).row;
+      if(-1 == mergeableRows.indexOf(row))
+        mergeableRows.push(row);
+    });
+
+>>>>>>> parent of afcbf79... 셀병합 수
     // 선택한 셀의 행이 연속적인 숫자가 아니라면 병합하지 않는다.
     if(mergeableRows.length - 1 !== (mergeableRows[mergeableRows.length - 1] - mergeableRows[0]))
      return false;
