@@ -2,7 +2,7 @@ import './util'
 
 import { expect } from 'chai'
 
-import '../../bower_components/things-scene/things-scene-min'
+import '../../bower_components/things-scene-core/things-scene-min'
 import { Table } from '../../src/index'
 
 describe('Table - Rows, Columns', function () {
