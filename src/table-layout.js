@@ -1,3 +1,6 @@
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
 var { Layout } = scene
 
 var TableLayout = {

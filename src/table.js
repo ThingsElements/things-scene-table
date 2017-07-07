@@ -1,3 +1,6 @@
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
 import TableCell from './table-cell'
 import TableLayout from './table-layout'
 
