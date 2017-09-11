@@ -15,6 +15,7 @@
   "homepage": "https://github.com/ThingsElements/things-scene-table/",
   "ignore": [
     "/.*",
+    "/src/",
     "/test/"
   ],
   "dependencies": {
