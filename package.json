@@ -1,13 +1,13 @@
 {
   "name": "things-scene-table",
-  "version": "2.0.0",
+  "version": "2.0.6",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "serve": "watchify src/*.js -o things-scene-table.js src/index.js & polyserve",
+    "serve": "watchify src/*.js -o things-scene-table.js src/index.js & polymer serve",
     "test": "./node_modules/.bin/mocha --require should --compilers js:babel-core/register test/**/test-*.js",
     "build": "browserify src/index.js -o things-scene-table.js && uglifyjs things-scene-table.js -o things-scene-table-min.js"
   },
@@ -39,6 +39,5 @@
     "watchify": "^3.3.1",
     "node-canvas": "Automattic/node-canvas"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

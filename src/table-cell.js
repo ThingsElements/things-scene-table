@@ -20,12 +20,12 @@ const NATURE = {
     }
   }, {
     type: 'string',
-    label: 'dataKey',
+    label: 'data-key',
     name: 'dataKey',
     property: 'dataKey'
   }, {
     type: 'number',
-    label: 'dataIndex',
+    label: 'data-index',
     name: 'dataIndex',
     property: 'dataIndex'
   }]
