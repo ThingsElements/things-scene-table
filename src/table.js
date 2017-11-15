@@ -534,7 +534,7 @@ export default class Table extends Container {
   }
 
   setCellsData() {
-    var data = this.get('data')
+    var data = this.data
 
     if(!data)
       return
