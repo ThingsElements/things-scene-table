@@ -549,7 +549,7 @@ export default class Table extends Container {
       var dataIndex = cell.model.dataIndex
       if(dataKey && dataIndex >= 0) {
         var currentData = data[dataIndex] || {}
-        cell.set('text', currentData[dataKey] || "")
+        cell.text = currentData[dataKey] || ""
       }
     })
   }
