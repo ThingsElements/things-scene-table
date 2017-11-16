@@ -547,10 +547,8 @@ export default class Table extends Container {
     cells.forEach(cell => {
       var dataKey = cell.model.dataKey
       var dataIndex = cell.model.dataIndex
-      if(dataKey && dataIndex >= 0) {
-        var currentData = data[dataIndex] || {}
-        cell.text = currentData[dataKey] || ""
-      }
+      if(dataKey && dataIndex >= 0)
+        cell.value = (data[dataIndex] || {})[dataKey]
     })
   }
 
