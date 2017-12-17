@@ -1,8 +1,9 @@
 {
-  "name": "things-scene-table",
+  "name": "@things-elements/things-scene-table",
+  "flat": true,
   "version": "2.1.0",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
-  "main": "index.js",
+  "main": "things-scene-table-min.js",
   "directories": {
     "test": "test"
   },
@@ -39,5 +40,7 @@
     "watchify": "^3.3.1",
     "node-canvas": "Automattic/node-canvas"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@hatiolab/things-scene": "^2.2.36"
+  }
 }
