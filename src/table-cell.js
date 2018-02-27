@@ -1,12 +1,12 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var {
+import {
   Component,
   Container,
   RectPath,
   Layout
-} = scene;
+} from '@hatiolab/things-scene';
 
 const NATURE = {
   mutable: false,
