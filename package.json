@@ -1,6 +1,6 @@
 {
   "name": "@things-elements/things-scene-table",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Things Scene Table Component.",
   "main": "src/index.js",
   "things-shell": true,
