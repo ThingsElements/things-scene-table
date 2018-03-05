@@ -3,12 +3,12 @@
  */
 import TableCell from './table-cell'
 
-import {
+var {
   Component,
   Container,
   Layout,
   Model
-} from '@hatiolab/things-scene';
+} = scene;
 
 const NATURE = {
   mutable: false,
