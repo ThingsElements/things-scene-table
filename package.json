@@ -1,9 +1,9 @@
 {
-  "name": "@things-elements/things-scene-table",
-  "version": "2.1.2",
+  "name": "@things-scene/table",
+  "version": "2.2.0",
   "description": "Things Scene Table Component.",
+  "things-scene": true,
   "main": "src/index.js",
-  "things-shell": true,
   "directories": {
     "test": "test"
   },
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "^0.2.27"
+    "@hatiolab/things-shell": "^0.3.0"
   },
   "dependencies": {
     "@hatiolab/things-scene": "^2.2.36"
