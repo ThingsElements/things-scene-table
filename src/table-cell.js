@@ -17,6 +17,8 @@ const NATURE = {
     label: '',
     name: '',
     property: {
+      merge: true,
+      split: true
     }
   }, {
     type: 'string',

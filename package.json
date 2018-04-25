@@ -1,7 +1,7 @@
 {
   "name": "@things-elements/things-scene-table",
   "flat": true,
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
   "main": "things-scene-table-min.js",
   "directories": {
@@ -36,7 +36,7 @@
     "chai": "^3.4.1",
     "mocha": "^2.3.4",
     "should": "^8.0.2",
-    "uglifyjs": "^2.4.10",
+    "uglify-js": "^2.4.10",
     "watchify": "^3.3.1",
     "node-canvas": "Automattic/node-canvas"
   },
