@@ -12,11 +12,13 @@ const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties : [{
+  properties: [{
     type: 'editor-table',
     label: '',
     name: '',
     property: {
+      merge: true,
+      split: true
     }
   }, {
     type: 'string',
@@ -46,8 +48,8 @@ function isRightMost(idx, rows, columns) {
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
  * 3. 데이타를 받을 수 있음.
  */
- export default class TableCell extends RectPath(Component) {
- // export default class TableCell extends Container {
+export default class TableCell extends RectPath(Component) {
+  // export default class TableCell extends Container {
 
   // get layout() {
   //   return Layout.get(this.get('layout') || 'card')
@@ -59,7 +61,7 @@ function isRightMost(idx, rows, columns) {
 
   set merged(merged) {
     this.set('merged', !!merged)
-    if(merged)
+    if (merged)
       this.set('text', '')
   }
 
@@ -88,7 +90,7 @@ function isRightMost(idx, rows, columns) {
   }
 
   _drawBorder(context, x, y, to_x, to_y, style) {
-    if(style && style.strokeStyle && style.lineWidth && style.lineDash) {
+    if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
       context.beginPath();
       context.moveTo(x, y)
       context.lineTo(to_x, to_y);
@@ -120,9 +122,9 @@ function isRightMost(idx, rows, columns) {
 
     this._drawBorder(context, left, top, left + width, top, border.top);
     this._drawBorder(context, left, top + height, left, top, border.left);
-    if(isRightMost(idx, rows, columns))
+    if (isRightMost(idx, rows, columns))
       this._drawBorder(context, left + width, top, left + width, top + height, border.right);
-    if(isBottomMost(idx, rows, columns))
+    if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
   }
 
