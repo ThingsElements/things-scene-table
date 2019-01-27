@@ -12,7 +12,8 @@
     "serve:dev": "things-shell-dev",
     "build:client": "webpack --config node_modules/@hatiolab/things-shell/webpack.config.js",
     "build": "webpack",
-    "prepublish": "webpack"
+    "prepublish": "webpack",
+    "prettify": "prettier --write \"{src,templates,test,locales}/**/*.{js,css,html}\""
   },
   "repository": {
     "type": "git",
@@ -25,9 +26,10 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "*"
+    "@hatiolab/things-shell": "*",
+    "@things-scene/random": "^0.3.4"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "*"
+    "@hatiolab/things-scene": "^2.5.0-rc.11"
   }
 }
