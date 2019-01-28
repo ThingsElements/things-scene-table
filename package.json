@@ -25,6 +25,11 @@
     "url": "https://github.com/ThingsElements/things-scene-table/issues"
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
+  },
   "devDependencies": {
     "@hatiolab/things-shell": "*",
     "@things-scene/random": "^0.3.4"
