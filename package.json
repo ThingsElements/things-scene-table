@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/table",
-  "version": "2.4.7",
+  "version": "2.4.8",
   "description": "Things Scene Table Component.",
   "things-scene": true,
   "main": "dist/things-scene-table.js",
@@ -37,6 +37,6 @@
     "@things-scene/random": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "*"
+    "@hatiolab/things-scene": "^2.5.0-rc"
   }
 }
