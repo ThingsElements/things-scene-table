@@ -20,7 +20,7 @@ export default [
   {
     input: 'src/index.js',
     plugins,
-    external: Object.keys(pkg.dependencies),
+    external,
     output: [
       {
         file: pkg.main,
