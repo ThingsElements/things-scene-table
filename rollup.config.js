@@ -23,7 +23,7 @@ export default [
     external,
     output: [
       {
-        file: pkg.main,
+        file: 'dist/things-scene-table.js',
         name: 'things-scene-table',
         format: 'umd',
         globals: {
