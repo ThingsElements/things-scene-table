@@ -1,9 +1,9 @@
 {
   "name": "@things-scene/table",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "description": "Things Scene Table Component.",
   "things-scene": true,
-  "main": "dist/things-scene-table.js",
+  "main": "src/index.js",
   "module": "dist/things-scene-table.mjs",
   "jsnext:main": "dist/things-scene-table.mjs",
   "directories": {
