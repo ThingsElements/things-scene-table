@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/table",
-  "version": "2.4.12",
+  "version": "2.4.13",
   "description": "Things Scene Table Component.",
   "things-scene": true,
   "main": "src/index.js",
@@ -13,8 +13,8 @@
     "serve": "things-shell",
     "serve:dev": "things-shell-dev",
     "build:client": "webpack --config node_modules/@hatiolab/things-shell/webpack.config.js",
-    "build": "rollup -c",
-    "prepublish": "rollup -c",
+    "build": "webpack && rollup -c",
+    "prepublish": "webpack && rollup -c",
     "prettify": "prettier --write \"{src,templates,test,locales}/**/*.{js,css,html}\""
   },
   "repository": {
@@ -37,6 +37,6 @@
     "@things-scene/random": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "^2.5.0-rc"
+    "@hatiolab/things-scene": "*"
   }
 }
