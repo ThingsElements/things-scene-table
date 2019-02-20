@@ -1,11 +1,9 @@
 {
   "name": "@things-scene/table",
-  "version": "2.4.13",
+  "version": "2.4.14",
   "description": "Things Scene Table Component.",
   "things-scene": true,
   "main": "src/index.js",
-  "module": "dist/things-scene-table.mjs",
-  "jsnext:main": "dist/things-scene-table.mjs",
   "directories": {
     "test": "test"
   },
@@ -27,11 +25,6 @@
     "url": "https://github.com/ThingsElements/things-scene-table/issues"
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
-  },
   "devDependencies": {
     "@hatiolab/things-shell": "*",
     "@things-scene/random": "*"

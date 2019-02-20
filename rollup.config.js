@@ -2,12 +2,10 @@ import babel from 'rollup-plugin-babel'
 import resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
-import graphql from 'rollup-plugin-graphql'
 
 let pkg = require('./package.json')
 let external = Object.keys(pkg.dependencies)
 let plugins = [
-  graphql(),
   resolve(),
   babel(),
   commonjs(),
@@ -28,7 +26,8 @@ export default [
         format: 'umd',
         globals: {
           '@hatiolab/things-scene': 'scene'
-        }
+        },
+        sourcemap: true
       }
     ]
   },
@@ -38,8 +37,9 @@ export default [
     external,
     output: [
       {
-        file: pkg.module,
-        format: 'esm'
+        file: 'dist/things-scene-table.mjs',
+        format: 'esm',
+        sourcemap: true
       }
     ]
   }
