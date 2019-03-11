@@ -120,27 +120,6 @@ export default class TableCell extends RectPath(Component) {
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
   }
-
-  // get capturable() {
-  //   return super.capturable && !this.merged
-  // }
-
-  // _post_draw(context) {
-  //
-  //   this.drawFill(context);
-  //
-  //   /* 자식 컴포넌트들 그리기 */
-  //   var { top, left, scale } = this.model;
-  //   context.translate(left, top);
-  //
-  //   this.layout.drawables(this).forEach(m => {
-  //     m.draw(context);
-  //   });
-  //
-  //   context.translate(-left, -top);
-  //
-  //   this.drawText(context);
-  // }
 }
 
 ;['border'].forEach(getter => Component.memoize(TableCell.prototype, getter, false))

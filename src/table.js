@@ -1,8 +1,6 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import TableCell from './table-cell'
-
 import { Component, Container, Layout, Model } from '@hatiolab/things-scene'
 
 const NATURE = {
@@ -30,7 +28,8 @@ const NATURE = {
         options: ['text', 'data']
       }
     }
-  ]
+  ],
+  'value-property': 'data'
 }
 
 const SIDES = {
@@ -58,12 +57,6 @@ const DEFAULT_STYLE = {
 
 const TABLE_LAYOUT = Layout.get('table')
 
-function hasAnyProperty(o, ...properties) {
-  for (let p in properties) {
-    if (o.hasOwnProperty(properties[p])) return true
-  }
-}
-
 function buildNewCell(app) {
   return Model.compile(
     {
@@ -73,12 +66,6 @@ function buildNewCell(app) {
       top: 0,
       width: 1,
       height: 1,
-      // fillStyle: 'lightgray',
-      // fillStyle: {
-      //   type: 'pattern',
-      //   image: './images/sample.png',
-      //   fitPattern: true
-      // },
       textWrap: true,
       border: buildBorderStyle(DEFAULT_STYLE, 'all')
     },
@@ -396,7 +383,7 @@ export default class Table extends Container {
   }
 
   get rows() {
-    return this.get('rows')
+    return Number(this.get('rows'))
   }
 
   setCellsStyle(cells, style, where) {
@@ -1407,7 +1394,7 @@ export default class Table extends Container {
   }
 
   get columns() {
-    return this.get('columns')
+    return Number(this.get('columns'))
   }
 
   get lefts() {
@@ -1438,10 +1425,6 @@ export default class Table extends Container {
 
   get bottoms() {
     return this.components.slice(this.columns * (this.rows - 1))
-  }
-
-  get all() {
-    return this.components
   }
 
   get widths_sum() {
@@ -1493,16 +1476,18 @@ export default class Table extends Container {
   }
 
   onchange(after, before) {
-    if (hasAnyProperty(after, 'rows', 'columns')) {
+    if ('rows' in after || 'columns' in after) {
+      let { rows, columns } = this
+
       this.buildCells(
-        this.get('rows'),
-        this.get('columns'),
-        before.hasOwnProperty('rows') ? before.rows : this.get('rows'),
-        before.hasOwnProperty('columns') ? before.columns : this.get('columns')
+        rows,
+        columns,
+        'rows' in before ? before.rows : rows,
+        'columns' in before ? before.columns : columns
       )
     }
 
-    if (before.data || after.data) {
+    if ('data' in after) {
       this.setCellsData()
     }
   }
@@ -1518,7 +1503,7 @@ export default class Table extends Container {
   }
 
   oncellchanged(after, before) {
-    if (hasAnyProperty(after, 'dataKey', 'dataIndex')) {
+    if ('dataKey' in after || 'dataIndex' in after) {
       this.setCellsData()
     }
   }
