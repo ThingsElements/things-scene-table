@@ -83,10 +83,6 @@ export default class TableCell extends RectPath(Component) {
     return this.get('colspan')
   }
 
-  get border() {
-    var border = this.model.border || EMPTY_BORDER
-  }
-
   _drawBorder(context, x, y, to_x, to_y, style) {
     if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
       context.beginPath()
@@ -121,7 +117,5 @@ export default class TableCell extends RectPath(Component) {
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
   }
 }
-
-;['border'].forEach(getter => Component.memoize(TableCell.prototype, getter, false))
 
 Component.register('table-cell', TableCell)

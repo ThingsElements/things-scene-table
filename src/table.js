@@ -1,7 +1,24 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import { Component, Container, Layout, Model } from '@hatiolab/things-scene'
+import { Component, Container, Layout } from '@hatiolab/things-scene'
+import {
+  CLEAR_STYLE,
+  buildNewCell,
+  buildCopiedCell,
+  setCellBorder,
+  isLeftMost,
+  isRightMost,
+  isTopMost,
+  isBottomMost,
+  above,
+  below,
+  before,
+  after,
+  array,
+  columnControlHandler,
+  rowControlHandler
+} from './helper-functions'
 
 const NATURE = {
   mutable: false,
@@ -32,172 +49,6 @@ const NATURE = {
   'value-property': 'data'
 }
 
-const SIDES = {
-  all: ['top', 'left', 'bottom', 'right'],
-  out: ['top', 'left', 'bottom', 'right'],
-  left: ['left'],
-  right: ['right'],
-  top: ['top'],
-  bottom: ['bottom'],
-  leftright: ['left', 'right'],
-  topbottom: ['top', 'bottom']
-}
-
-const CLEAR_STYLE = {
-  strokeStyle: '',
-  lineDash: 'solid',
-  lineWidth: 0
-}
-
-const DEFAULT_STYLE = {
-  strokeStyle: '#999',
-  lineDash: 'solid',
-  lineWidth: 1
-}
-
-const TABLE_LAYOUT = Layout.get('table')
-
-function buildNewCell(app) {
-  return Model.compile(
-    {
-      type: 'table-cell',
-      strokeStyle: 'blue',
-      left: 0,
-      top: 0,
-      width: 1,
-      height: 1,
-      textWrap: true,
-      border: buildBorderStyle(DEFAULT_STYLE, 'all')
-    },
-    app
-  )
-}
-
-function buildCopiedCell(copy, app) {
-  var obj = JSON.parse(JSON.stringify(copy))
-  delete obj.text
-  return Model.compile(obj, app)
-}
-
-function buildBorderStyle(style, where) {
-  return (SIDES[where] || []).reduce((border, side) => {
-    border[side] = style
-    return border
-  }, {})
-}
-
-function setCellBorder(cell, style, where) {
-  if (!cell) return
-  cell.set('border', Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where)))
-}
-
-function isLeftMost(total, columns, indices, i) {
-  return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1
-}
-
-function isRightMost(total, columns, indices, i) {
-  return i == total - 1 || i % columns == columns - 1 || indices.indexOf(i + 1) == -1
-}
-
-function isTopMost(total, columns, indices, i) {
-  return i < columns || indices.indexOf(i - columns) == -1
-}
-
-function isBottomMost(total, columns, indices, i) {
-  return i > total - columns - 1 || indices.indexOf(i + columns) == -1
-}
-
-function above(columns, i) {
-  return i - columns
-}
-
-function below(columns, i) {
-  return i + columns
-}
-
-function before(columns, i) {
-  return !(i % columns) ? -1 : i - 1
-}
-
-function after(columns, i) {
-  return !((i + 1) % columns) ? -1 : i + 1
-}
-
-function array(value, size) {
-  var arr = []
-  for (let i = 0; i < size; i++) arr.push(1)
-  return arr
-}
-
-var columnControlHandler = {
-  ondragmove: function(point, index, component) {
-    var { left, top, width, height } = component.textBounds
-    var widths_sum = component.widths_sum
-
-    var widths = component.widths.slice()
-
-    /* 컨트롤의 원래 위치를 구한다. */
-    var origin_pos_unit = widths.slice(0, index + 1).reduce((sum, width) => sum + width, 0)
-    var origin_offset = left + (origin_pos_unit / widths_sum) * width
-
-    /*
-     * point의 좌표는 부모 레이어 기준의 x, y 값이다.
-     * 따라서, 도형의 회전을 감안한 좌표로의 변환이 필요하다.
-     * Transcoord시에는 point좌표가 부모까지 transcoord되어있는 상태이므로,
-     * 컴포넌트자신에 대한 transcoord만 필요하다.(마지막 파라미터를 false로).
-     */
-    var transcoorded = component.transcoordP2S(point.x, point.y)
-    var diff = transcoorded.x - origin_offset
-
-    var diff_unit = (diff / width) * widths_sum
-
-    var min_width_unit = (widths_sum / width) * 10 // 10픽셀정도를 최소로
-
-    if (diff_unit < 0) diff_unit = -Math.min(widths[index] - min_width_unit, -diff_unit)
-    else diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
-
-    widths[index] = Math.round((widths[index] + diff_unit) * 100) / 100
-    widths[index + 1] = Math.round((widths[index + 1] - diff_unit) * 100) / 100
-
-    component.set('widths', widths)
-  }
-}
-
-var rowControlHandler = {
-  ondragmove: function(point, index, component) {
-    var { left, top, width, height } = component.textBounds
-    var heights_sum = component.heights_sum
-
-    var heights = component.heights.slice()
-
-    /* 컨트롤의 원래 위치를 구한다. */
-    index -= component.columns - 1
-    var origin_pos_unit = heights.slice(0, index + 1).reduce((sum, height) => sum + height, 0)
-    var origin_offset = top + (origin_pos_unit / heights_sum) * height
-
-    /*
-     * point의 좌표는 부모 레이어 기준의 x, y 값이다.
-     * 따라서, 도형의 회전을 감안한 좌표로의 변환이 필요하다.
-     * Transcoord시에는 point좌표가 부모까지 transcoord되어있는 상태이므로,
-     * 컴포넌트자신에 대한 transcoord만 필요하다.(마지막 파라미터를 false로).
-     */
-    var transcoorded = component.transcoordP2S(point.x, point.y)
-    var diff = transcoorded.y - origin_offset
-
-    var diff_unit = (diff / height) * heights_sum
-
-    var min_height_unit = (heights_sum / height) * 10 // 10픽셀정도를 최소로
-
-    if (diff_unit < 0) diff_unit = -Math.min(heights[index] - min_height_unit, -diff_unit)
-    else diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
-
-    heights[index] = Math.round((heights[index] + diff_unit) * 100) / 100
-    heights[index + 1] = Math.round((heights[index + 1] - diff_unit) * 100) / 100
-
-    component.set('heights', heights)
-  }
-}
-
 export default class Table extends Container {
   created() {
     var tobeSize = this.rows * this.columns
@@ -211,7 +62,7 @@ export default class Table extends Container {
     } else {
       let newbies = []
 
-      for (let i = 0; i < -gap; i++) newbies.push(buildNewCell(this.app))
+      for (let i = 0; i < -gap; i++) newbies.push(buildNewCell('table-cell', this.app))
 
       this.add(newbies)
     }
@@ -223,8 +74,12 @@ export default class Table extends Container {
     if (!heights || heights.length < this.rows) this.set('heights', this.heights)
   }
 
-  // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
+  containable(component) {
+    return component.get('type') == 'table-cell'
+  }
+
   get focusible() {
+    /* 이 컨테이너에는 컴포넌트를 임의로 추가 및 삭제할 수 없도록 함 */
     return false
   }
 
@@ -305,7 +160,7 @@ export default class Table extends Container {
     if (newcolumns > oldcolumns) {
       for (let r = 0; r < minrows; r++) {
         for (let c = oldcolumns; c < newcolumns; c++) {
-          this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c)
+          this.insertComponentAt(buildNewCell('table-cell', this.app), r * newcolumns + c)
         }
       }
     } else if (newcolumns < oldcolumns) {
@@ -366,7 +221,7 @@ export default class Table extends Container {
 
       for (let r = oldrows; r < newrows; r++) {
         for (let i = 0; i < newcolumns; i++) {
-          newbies.push(buildNewCell(this.app))
+          newbies.push(buildNewCell('table-cell', this.app))
         }
       }
       this.add(newbies)
@@ -379,7 +234,7 @@ export default class Table extends Container {
   }
 
   get layout() {
-    return TABLE_LAYOUT
+    return Layout.get('table')
   }
 
   get rows() {
@@ -520,7 +375,6 @@ export default class Table extends Container {
 
   getRowColumn(cell) {
     var idx = this.components.indexOf(cell)
-    var length = this.components.length
 
     return {
       column: idx % this.columns,
@@ -884,7 +738,7 @@ export default class Table extends Container {
           }
           // 추가하려는 행이 슈퍼셀을 포함한 경우
           if (superCellRow === row) {
-            for (let i = 0; i < this.columns; i++) newbieCells.push(buildNewCell(this.app))
+            for (let i = 0; i < this.columns; i++) newbieCells.push(buildNewCell('table-cell', this.app))
             newbieRowHeights.push(this.heights[row])
 
             newbieCells.reverse().forEach(cell => {
@@ -997,7 +851,7 @@ export default class Table extends Container {
           }
           // 추가하려는 행이 병합된 셀중 마지막 행인 경우
           if (superCellRow + superCellObj.rowspan - 1 === row) {
-            for (let i = 0; i < this.columns; i++) newbieCells.push(buildNewCell(this.app))
+            for (let i = 0; i < this.columns; i++) newbieCells.push(buildNewCell('table-cell', this.app))
             newbieRowHeights.push(this.heights[row])
 
             newbieCells.reverse().forEach(cell => {
@@ -1125,7 +979,7 @@ export default class Table extends Container {
           }
           // 추가하려는 열이 슈퍼셀을 포함한 경우
           if (superCellColumn === column) {
-            for (let i = 0; i < this.rows; i++) newbieCells.push(buildNewCell(this.app))
+            for (let i = 0; i < this.rows; i++) newbieCells.push(buildNewCell('table-cell', this.app))
             newbieColumnWidths.push(this.widths[column])
 
             let increasedColumns = this.columns
@@ -1255,7 +1109,7 @@ export default class Table extends Container {
           }
           // 추가하려는 열이 병합된 셀중 마지막 열인 경우
           if (superCellColumn + superCellObj.colspan - 1 === column) {
-            for (let i = 0; i < this.rows; i++) newbieCells.push(buildNewCell(this.app))
+            for (let i = 0; i < this.rows; i++) newbieCells.push(buildNewCell('table-cell', this.app))
             newbieColumnWidths.push(this.widths[column])
 
             let increasedColumns = this.columns
