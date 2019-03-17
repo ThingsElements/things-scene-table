@@ -78,7 +78,7 @@ export default class DataList extends Container {
   }
 
   _onwheel(e) {
-    var { width, height } = this.bounds
+    var { height } = this.bounds
     var { offset = { x: 0, y: 0 } } = this.state
 
     var recordHeight = (this.heights[0] / this.heights.reduce((sum, height) => sum + height)) * height
@@ -92,15 +92,45 @@ export default class DataList extends Container {
     var x = e.deltaX + offset.x
     var y = e.deltaY + offset.y
 
-    let newoffset = {
-      x: Math.max(Math.min(0, x), minX),
-      y: Math.max(Math.min(0, y), minY)
-    }
-
     /* 휠을 밀면.. 위로 : scroll up */
     /* 휠을 당기면.. 아래로 : scroll down */
 
-    this.setState('offset', newoffset)
+    this.setState('offset', {
+      x: Math.max(Math.min(0, x), minX),
+      y: Math.max(Math.min(0, y), minY)
+    })
+  }
+
+  _ondragstart(e) {
+    this.__START_OFFSET = {
+      x: 0,
+      y: 0,
+      ...this.state.offset
+    }
+    this.__START_Y = e.offsetY
+  }
+
+  _ondragmove(e) {
+    if (!this.__START_OFFSET) {
+      return
+    }
+
+    var { height } = this.bounds
+
+    var recordHeight = (this.heights[0] / this.heights.reduce((sum, height) => sum + height)) * height
+    var minY = this.data && this.data.length ? -recordHeight * this.data.length + height : 0
+
+    var y = this.__START_OFFSET.y + (e.offsetY - this.__START_Y) / this.rootModel.state.scale.y
+
+    this.setState('offset', {
+      x: 0,
+      y: Math.max(Math.min(0, y), minY)
+    })
+  }
+
+  _ondragend(e) {
+    delete this.__START_OFFSET
+    delete this.__START_Y
   }
 
   get layout() {
@@ -139,7 +169,7 @@ export default class DataList extends Container {
 
   get heights() {
     var heights = this.get('heights')
-    var rows = 3
+    var rows = 2
 
     if (!heights) {
       return array(1, rows)
@@ -214,7 +244,10 @@ export default class DataList extends Container {
     return {
       '(self)': {
         '(all)': {
-          wheel: this._onwheel
+          wheel: this._onwheel,
+          touchstart: this._ondragstart,
+          touchmove: this._ondragmove,
+          touchend: this._ondragend
         }
       }
     }
