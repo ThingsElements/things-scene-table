@@ -27,9 +27,11 @@
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
   "devDependencies": {
     "@hatiolab/things-shell": "*",
+    "@things-scene/excel": "*",
     "@things-scene/random": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "*"
+    "@hatiolab/things-scene": "*",
+    "lit-element": "^2.0.1"
   }
 }
