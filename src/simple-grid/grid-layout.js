@@ -12,6 +12,7 @@ var GridLayout = {
     var rows = (layoutConfig && layoutConfig.rows) || container.get('rows')
     var widths = (layoutConfig && layoutConfig.widths) || container.get('widths')
     var heights = (layoutConfig && layoutConfig.heights) || container.get('heights')
+    var { offset = { x: 0, y: 0 } } = container.state
 
     var widths_sum = widths ? widths.filter((width, i) => i < columns).reduce((sum, width) => sum + width, 0) : columns
     var heights_sum = heights ? heights.filter((height, i) => i < rows).reduce((sum, height) => sum + height, 0) : rows
@@ -27,23 +28,50 @@ var GridLayout = {
     var y = 0
     var components = container.components
 
-    components.forEach((component, idx) => {
+    /* draw header */
+    components.slice(0, columns).forEach((component, idx) => {
       let w = widths ? widths[idx % columns] : 1
-      let h = heights ? heights[Math.floor(idx / columns)] : 1
+      let h = heights ? heights[idx < columns ? 0 : 1] : 1
 
-      let colspan = component.colspan || 1
-      let wspan = 0
-      while (--colspan > 0) wspan += widths ? widths[(idx + colspan) % columns] : 1
-
-      let rowspan = component.rowspan || 1
-      let hspan = 0
-      while (--rowspan > 0) hspan += heights ? heights[Math.floor(idx / columns) + rowspan] : 1
+      let left = paddingLeft + x
+      let top = paddingTop + y
+      let width = width_unit * w
+      let height = height_unit * h
 
       component.bounds = {
-        left: paddingLeft + x,
-        top: paddingTop + y,
-        width: width_unit * (w + wspan),
-        height: height_unit * (h + hspan)
+        left,
+        top,
+        width,
+        height
+      }
+      component.set('rotation', 0)
+
+      if (idx % columns == columns - 1) {
+        x = 0
+        y += h * height_unit
+      } else {
+        x += w * width_unit
+      }
+    })
+
+    /* draw records */
+    x += offset.x
+    y += offset.y
+
+    components.slice(columns).forEach((component, idx) => {
+      let w = widths ? widths[idx % columns] : 1
+      let h = heights ? heights[idx < columns ? 0 : 1] : 1
+
+      let left = paddingLeft + x
+      let top = paddingTop + y
+      let width = width_unit * w
+      let height = height_unit * h
+
+      component.bounds = {
+        left,
+        top,
+        width,
+        height
       }
       component.set('rotation', 0)
 
@@ -57,15 +85,11 @@ var GridLayout = {
   },
 
   capturables: function(container) {
-    return container.components.filter(cell => {
-      return !cell.merged
-    })
+    return container.components
   },
 
   drawables: function(container) {
-    return container.components.filter(cell => {
-      return !cell.merged
-    })
+    return container.components
   },
 
   isStuck: function(component) {

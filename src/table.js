@@ -15,7 +15,9 @@ import {
   below,
   before,
   after,
-  array
+  array,
+  columnControlHandler,
+  rowControlHandler
 } from './helper-functions'
 
 const NATURE = {

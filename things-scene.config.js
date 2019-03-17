@@ -24,12 +24,13 @@ var templates = [
     }
   },
   {
-    type: 'simple-grid',
-    description: 'simple grid',
+    type: 'data-list',
+    description: 'data list',
     group: 'table',
+    /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
     icon,
     model: {
-      type: 'simple-grid',
+      type: 'data-list',
       top: 100,
       left: 100,
       width: 500,
@@ -37,16 +38,7 @@ var templates = [
       strokeStyle: '#999',
       fillStyle: 'white',
       lineWidth: 2,
-      data: [
-        {
-          aaa: 'AAA',
-          bbb: 'bbb'
-        },
-        {
-          aaa: 'AAAA',
-          bbb: 'bbbb'
-        }
-      ]
+      columns: 5
     }
   }
 ]

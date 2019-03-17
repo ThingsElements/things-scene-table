@@ -44,9 +44,9 @@ export default class SimpleGridField extends RectPath(Component) {
   }
 
   _draw(context) {
-    if (this.app.isViewMode) {
-      return
-    }
+    // if (this.app.isViewMode) {
+    //   return
+    // }
 
     var { left, top, width, height } = this.bounds
 
