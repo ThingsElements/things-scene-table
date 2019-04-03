@@ -91,13 +91,13 @@ export default class SimpleGrid extends Container {
     var recordsHeight = height - headerHeight
 
     var minX = 0
-    var minY = this.data && this.data.length ? -recordHeight * this.data.length + recordsHeight : 0
+    var minY = this.data && this.data.length ? Math.min(-recordHeight * this.data.length + recordsHeight, 0) : 0
 
     /* shiftKey + wheel 은 deltaX 값을 변화시킨다. */
     if (e.deltaY == 0 && e.deltaX == 0) return
 
     var x = e.deltaX + offset.x
-    var y = e.deltaY + offset.y
+    var y = -e.deltaY + offset.y
 
     let newoffset = {
       x: Math.max(Math.min(0, x), minX),

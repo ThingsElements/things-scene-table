@@ -84,16 +84,16 @@ export default class DataList extends Container {
     var recordHeight = (this.heights[0] / this.heights.reduce((sum, height) => sum + height)) * height
 
     var minX = 0
-    var minY = this.data && this.data.length ? -recordHeight * this.data.length + height : 0
+    var minY = this.data && this.data.length ? Math.min(-recordHeight * this.data.length + height, 0) : 0
 
     /* shiftKey + wheel 은 deltaX 값을 변화시킨다. */
     if (e.deltaY == 0 && e.deltaX == 0) return
 
     var x = e.deltaX + offset.x
-    var y = e.deltaY + offset.y
+    var y = -e.deltaY + offset.y
 
-    /* 휠을 밀면.. 위로 : scroll up */
-    /* 휠을 당기면.. 아래로 : scroll down */
+    /* 휠을 밀면.. 화면은 위쪽으로 : scroll down */
+    /* 휠을 당기면.. 화면은 아래쪽으로 : scroll up */
 
     this.setState('offset', {
       x: Math.max(Math.min(0, x), minX),
@@ -592,27 +592,7 @@ export default class DataList extends Container {
     this.set('widths', widths)
   }
 
-  distributeVertical(cells) {
-    var rows = []
-
-    cells.forEach(cell => {
-      let rowcolumn = this.getRowColumn(cell)
-
-      if (-1 == rows.indexOf(rowcolumn.row)) rows.push(rowcolumn.row)
-    })
-
-    var sum = rows.reduce((sum, row) => {
-      return sum + this.heights[row]
-    }, 0)
-
-    var newval = Math.round((sum / rows.length) * 100) / 100
-    var heights = this.heights.slice()
-    rows.forEach(row => {
-      heights[row] = newval
-    })
-
-    this.set('heights', heights)
-  }
+  distributeVertical(cells) {}
 }
 
 Component.register('data-list', DataList)
