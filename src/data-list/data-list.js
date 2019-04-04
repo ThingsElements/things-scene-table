@@ -49,6 +49,35 @@ export default class DataList extends Container {
     context.clip()
   }
 
+  postrender(context) {
+    super.postrender(context)
+
+    this.renderScrollbar(context)
+  }
+
+  renderScrollbar(context) {
+    var { left, top, width, height } = this.bounds
+    var { offset = { x: 0, y: 0 }, data } = this.state
+
+    var fullHeight = ((data && data.length) || 0) * (this.heights[0] / this.heights_sum) * height
+
+    if (fullHeight <= height) {
+      return
+    }
+
+    var start = (-offset.y / fullHeight) * height
+    var end = ((-offset.y + height) / fullHeight) * height
+
+    context.strokeStyle = 'gray'
+    context.lineWidth = 10
+    context.globalAlpha = 0.3
+
+    context.moveTo(left + width - 10, top + start)
+    context.lineTo(left + width - 10, top + end)
+
+    context.stroke()
+  }
+
   created() {
     this.set('rows', 2)
 
@@ -95,9 +124,11 @@ export default class DataList extends Container {
     /* 휠을 밀면.. 화면은 위쪽으로 : scroll down */
     /* 휠을 당기면.. 화면은 아래쪽으로 : scroll up */
 
-    this.setState('offset', {
-      x: Math.max(Math.min(0, x), minX),
-      y: Math.max(Math.min(0, y), minY)
+    this.setState({
+      offset: {
+        x: Math.max(Math.min(0, x), minX),
+        y: Math.max(Math.min(0, y), minY)
+      }
     })
   }
 
