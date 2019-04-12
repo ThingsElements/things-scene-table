@@ -41,18 +41,17 @@ const NATURE = {
 }
 
 export default class DataList extends Container {
-  render(context) {
-    super.render(context)
-
+  postrender(context) {
     // 컨테이너의 범위 내에서만 그린다.
     // container의 기본 기능으로 추가되면 좋겠다.
     context.clip()
-  }
 
-  postrender(context) {
     super.postrender(context)
 
-    this.renderScrollbar(context)
+    // child component들을 다 그린 후에 scrollbar를 표현한다.
+    if (this.app.isViewMode) {
+      this.renderScrollbar(context)
+    }
   }
 
   renderScrollbar(context) {
@@ -72,6 +71,7 @@ export default class DataList extends Container {
     context.lineWidth = 10
     context.globalAlpha = 0.3
 
+    context.beginPath()
     context.moveTo(left + width - 10, top + start)
     context.lineTo(left + width - 10, top + end)
 
@@ -107,6 +107,8 @@ export default class DataList extends Container {
   }
 
   _onwheel(e) {
+    e.stopPropagation()
+
     var { height } = this.bounds
     var { offset = { x: 0, y: 0 } } = this.state
 
