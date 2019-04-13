@@ -134,16 +134,15 @@ export default class DataList extends Container {
     })
   }
 
-  _ondragstart(e) {
-    this.__START_OFFSET = {
+  _ontouchstart(e) {
+    this.__START_OFFSET = this.state.offset || {
       x: 0,
-      y: 0,
-      ...this.state.offset
+      y: 0
     }
     this.__START_Y = e.offsetY
   }
 
-  _ondragmove(e) {
+  _ontouchmove(e) {
     if (!this.__START_OFFSET) {
       return
     }
@@ -151,17 +150,24 @@ export default class DataList extends Container {
     var { height } = this.bounds
 
     var recordHeight = (this.heights[0] / this.heights.reduce((sum, height) => sum + height)) * height
-    var minY = this.data && this.data.length ? -recordHeight * this.data.length + height : 0
+    var minY = this.data && this.data.length ? Math.min(-recordHeight * this.data.length + height, 0) : 0
 
+    var x = 0
     var y = this.__START_OFFSET.y + (e.offsetY - this.__START_Y) / this.rootModel.state.scale.y
+    y = Math.max(Math.min(0, y), minY)
 
-    this.setState('offset', {
-      x: 0,
-      y: Math.max(Math.min(0, y), minY)
-    })
+    var offset = this.state.offset || { x: 0, y: 0 }
+    if (offset.x !== x || offset.y !== y) {
+      this.setState('offset', {
+        x,
+        y
+      })
+
+      e.stopPropagation()
+    }
   }
 
-  _ondragend(e) {
+  _ontouchend(e) {
     delete this.__START_OFFSET
     delete this.__START_Y
   }
@@ -278,9 +284,9 @@ export default class DataList extends Container {
       '(self)': {
         '(all)': {
           wheel: this._onwheel,
-          touchstart: this._ondragstart,
-          touchmove: this._ondragmove,
-          touchend: this._ondragend
+          touchstart: this._ontouchstart,
+          touchmove: this._ontouchmove,
+          touchend: this._ontouchend
         }
       }
     }
