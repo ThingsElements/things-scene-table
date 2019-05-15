@@ -305,10 +305,15 @@ export default class DataList extends Container {
     /* 기존의 레코드를 모두 삭제 (템플릿 레코드만 남긴다.) */
     this.remove(this.components.slice(this.columns))
 
+    /* template 레코드의 데이타를 클리어시킨다 */
+    var templates = this.getCellsByRow(0)
+    templates.forEach(field => {
+      field.data = ''
+    })
+
     /* 데이타의 크기만큼 새로운 레코드를 만든다 */
     if (data.length > 1) {
       let newbies = []
-      let templates = this.getCellsByRow(0)
 
       for (let i = 1; i < data.length; i++) {
         newbies = newbies.concat(
