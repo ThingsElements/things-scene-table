@@ -111,9 +111,9 @@ export default class TableCell extends RectPath(Component) {
 
     this._drawBorder(context, left, top, left + width, top, border.top)
     this._drawBorder(context, left, top + height, left, top, border.left)
-    if (isRightMost(idx, rows, columns))
+    // if (isRightMost(idx, rows, columns))
       this._drawBorder(context, left + width, top, left + width, top + height, border.right)
-    if (isBottomMost(idx, rows, columns))
+    // if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
   }
 }
