@@ -34,12 +34,12 @@ const NATURE = {
 
 const EMPTY_BORDER = {}
 
-function isBottomMost(idx, rows, columns) {
-  return idx >= (rows - 1) * columns
+function isBottomMost(idx, rows, columns, components) {
+  return idx >= (rows - 1) * columns || (components[idx + columns] && components[idx + columns].hidden)
 }
 
-function isRightMost(idx, rows, columns) {
-  return (idx + 1) % columns == 0
+function isRightMost(idx, rows, columns, components) {
+  return (idx + 1) % columns == 0 || (components[idx + 1] && components[idx + 1].hidden)
 }
 
 /**
@@ -111,9 +111,9 @@ export default class TableCell extends RectPath(Component) {
 
     this._drawBorder(context, left, top, left + width, top, border.top)
     this._drawBorder(context, left, top + height, left, top, border.left)
-    // if (isRightMost(idx, rows, columns))
+    if (isRightMost(idx, rows, columns, parent.components))
       this._drawBorder(context, left + width, top, left + width, top + height, border.right)
-    // if (isBottomMost(idx, rows, columns))
+    if (isBottomMost(idx, rows, columns, parent.components))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
   }
 }
