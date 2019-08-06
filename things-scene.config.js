@@ -1,5 +1,3 @@
-import locales from './locales'
-
 import icon from './assets/table.png'
 
 var templates = [
@@ -44,6 +42,5 @@ var templates = [
 ]
 
 export default {
-  templates,
-  locales
+  templates
 }

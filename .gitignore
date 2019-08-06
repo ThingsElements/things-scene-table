@@ -10,3 +10,4 @@ dist-client
 licenses/*.js
 yarn.lock
 package-lock.json
+db.sqlite
