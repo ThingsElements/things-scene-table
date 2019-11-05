@@ -1,6 +1,7 @@
 import locales from './locales'
 
-import icon from './assets/table.png'
+import tableIcon from './assets/table.png'
+import dataListIcon from './assets/data-list.png'
 
 var templates = [
   {
@@ -8,7 +9,7 @@ var templates = [
     description: 'table',
     group: 'table',
     /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
-    icon,
+    icon: tableIcon,
     model: {
       type: 'table',
       top: 100,
@@ -28,7 +29,7 @@ var templates = [
     description: 'data list',
     group: 'table',
     /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
-    icon,
+    icon: dataListIcon,
     model: {
       type: 'data-list',
       top: 100,
