@@ -11,3 +11,4 @@ licenses/*.js
 yarn.lock
 package-lock.json
 dist
+db.sqlite
