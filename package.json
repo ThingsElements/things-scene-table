@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
   "devDependencies": {
-    "@things-factory/board-app": "*",
-    "@things-factory/board-test": "*",
+    "@things-factory/board-app": "^1.0.0-alpha.1",
+    "@things-factory/board-test": "^1.0.0-alpha.1",
     "@things-scene/excel": "*",
     "@things-scene/random": "*"
   },
