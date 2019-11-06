@@ -296,12 +296,6 @@ export default class DataList extends Container {
     if (!this.app.isViewMode) {
       return
     }
-    this.setState({
-      offset: {
-        x: 0,
-        y: 0
-      }
-    })
 
     var data = this.data || []
     if (!(data instanceof Array)) {
