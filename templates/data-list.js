@@ -1,4 +1,4 @@
-import icon from '../assets/data-list.png'
+import icon from '../assets/icon-data-list.png'
 
 export default {
   type: 'data-list',

@@ -1,4 +1,4 @@
-import icon from '../assets/table.png';
+import icon from '../assets/icon-table.png'
 
 export default {
   type: 'table',
@@ -17,6 +17,10 @@ export default {
     lineWidth: 2,
     rows: 5,
     columns: 5,
-    data: [['header1', 'header2', 'header3'], [100, 200, 300], [1000, 2000, 3000]]
+    data: [
+      ['header1', 'header2', 'header3'],
+      [100, 200, 300],
+      [1000, 2000, 3000]
+    ]
   }
 }
