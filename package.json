@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/table",
-  "version": "2.5.13",
+  "version": "2.5.14",
   "description": "Things Scene Table Component.",
   "things-scene": true,
   "main": "src/index.js",
@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-table#readme",
   "devDependencies": {
-    "@things-factory/board-app": "^1.0.0-alpha.1",
-    "@things-factory/board-test": "^1.0.0-alpha.1",
+    "@things-factory/board-app": "^2.0.0",
+    "@things-factory/board-test": "^2.0.0",
     "@things-scene/excel": "*",
     "@things-scene/random": "*"
   },
