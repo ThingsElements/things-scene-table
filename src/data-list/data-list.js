@@ -86,6 +86,10 @@ export default class DataList extends Container {
     var tobeSize = rows * this.columns
     var gap = this.size() - tobeSize
 
+    if (this.data) {
+      this.setCellsData()
+    }
+
     if (gap == 0) {
       return
     } else if (gap > 0) {

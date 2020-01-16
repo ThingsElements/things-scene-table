@@ -54,6 +54,10 @@ export default class Table extends Container {
     var tobeSize = this.rows * this.columns
     var gap = this.size() - tobeSize
 
+    if (this.data) {
+      this.setCellsData()
+    }
+
     if (gap == 0) {
       return
     } else if (gap > 0) {
